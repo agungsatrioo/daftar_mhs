@@ -19,12 +19,16 @@ class M_mhs extends CI_Model {
     }
     
     public function get_mhs($nim = 0) {
+        $arr = ["nim","nama","t_mahasiswa.jk","t_mahasiswa.tempat_lahir", "t_mahasiswa.tanggal_lahir", "tanggal_masuk", "nama_jurusan", "dospem.nama_dosen as nama_dospem"];
         $builder = [
                         "table" => 't_mahasiswa',
-                        "fields" => "*",
+                        "fields" => $arr,
                         "joins" => [
                             't_jurusan' => [
                                 "on" => ["t_jurusan.kode_jurusan"=>"t_mahasiswa.kode_jurusan"]
+                            ],
+                            't_dosen dospem' => [
+                                "on" => ["dospem.nik"=>"t_mahasiswa.nik_dospem"]
                             ]
                         ],
                     ];

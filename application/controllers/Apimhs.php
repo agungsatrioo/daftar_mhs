@@ -21,5 +21,17 @@ class Apimhs extends REST_Controller {
         $this->response($kontak, 200);
     }
 
+    function index_delete() {
+        $nim = $this->delete('nim');
+        $this->db->where('nim', $nim);
+        $delete = $this->db->delete('t_mahasiswa');
+
+        if ($delete) {
+            $this->response(array('status' => 'success'), 201);
+        } else {
+            $this->response(array('status' => 'fail', 502));
+        }
+    }
+
     //Masukan function selanjutnya disini
 }
