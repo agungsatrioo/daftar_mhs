@@ -14,6 +14,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         <div class="wrapper">
             <div class="container-fluid">
                 <h1 class="text-center">Daftar Mahasiswa</h1>
+
+                <?= @$alert ?>
+
+                <a href="<?= base_url("akademik/form")?>" class="btn btn-primary m-2">Tambah</a>
                 <?= @$daftar ?>
             </div>
         </div>
@@ -24,10 +28,36 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         
         <script src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
         <script src="https://cdn.datatables.net/1.10.20/js/dataTables.bootstrap4.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/bootbox.js/5.4.0/bootbox.min.js"></script>
+
         
         <script>
-                    $(document).ready(function() {
+        $(document).ready(function() {
             $('#mahasiswa').DataTable();
+            $('.btn-delete').click(function(e) {
+               e.preventDefault();
+                var empid = $(this).attr('href');
+                bootbox.dialog({
+                    message: "Anda yakin untuk menghapus ini?",
+                    title: "Konfirmasi",
+                    buttons: {
+                        success: {
+                            label: "Tidak",
+                            className: "btn-success",
+                            callback: function() {
+                                $('.bootbox').modal('hide');
+                            }
+                        },
+                        danger: {
+                            label: "Ya",
+                            className: "btn-danger",
+                                callback: function() {
+                                   window.location = empid;
+                            }
+                        }
+                    }
+                });
+            });
         });
         </script>
     </body>
