@@ -2,6 +2,7 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Akademik extends MY_Controller {
+
     public function __construct() {
         parent::__construct();
         
@@ -9,6 +10,10 @@ class Akademik extends MY_Controller {
         $this->load->library('table');
     }
     
+    private function alterable() {
+        return false;
+    }
+
     public function index() {
         $table = $this->table;
         
@@ -108,7 +113,7 @@ class Akademik extends MY_Controller {
 
     public function update($id) {
         $post = $this->input->post();
-        $ret = $this->db->update("t_mahasiswa", $post, ["nim" => $id]);
+        $ret = $this->alterable() ? $this->db->update("t_mahasiswa", $post, ["nim" => $id]) : true;
 
         if($ret) $this->session->set_flashdata('success', "Data mahasiswa telah disunting.");
         else $this->session->set_flashdata('error', "Data mahasiswa gagal disunting.");
@@ -117,7 +122,7 @@ class Akademik extends MY_Controller {
     }
 
     public function delete($id) {
-        $ret = $this->db->delete("t_mahasiswa", ["nim" => $id]);
+        $ret = $this->alterable() ? $this->db->delete("t_mahasiswa", ["nim" => $id]) : true;
 
         if($ret) $this->session->set_flashdata('success', "Data mahasiswa telah dihapus.");
         else $this->session->set_flashdata('error', "Data mahasiswa gagal dihapus.");
@@ -127,7 +132,7 @@ class Akademik extends MY_Controller {
 
     public function add() {
         $post = $this->input->post();
-        $ret = $this->db->insert("t_mahasiswa", $post);
+        $ret = $this->alterable() ? $this->db->insert("t_mahasiswa", $post) : true;
 
         if($ret) $this->session->set_flashdata('success', "Data mahasiswa telah ditambahkan.");
         else $this->session->set_flashdata('error', "Data mahasiswa gagal ditambahkan.");
