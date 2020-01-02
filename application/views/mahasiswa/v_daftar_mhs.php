@@ -17,7 +17,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
                 <?= @$alert ?>
 
-                <a href="<?= base_url("akademik/form")?>" class="btn btn-primary m-2">Tambah</a>
+                <a href="<?= base_url("{$prefix}/form")?>" class="btn btn-primary m-2">Tambah</a>
                 <?= @$daftar ?>
             </div>
         </div>
