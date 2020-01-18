@@ -139,4 +139,69 @@ class M_user extends CI_Model {
             return false;
         }
     }
+
+    public function login_api($input) {
+        $identity   = $input->post('ni');
+        $password   = $input->post('password');
+        $uniqueid   = $this->security->get_csrf_hash();
+
+        $user_db  = $this->m_query->select(
+                        array(
+                            'table' => 't_pengguna',
+                            'conditions' => array(
+                                'identity' => $identity,
+                            )
+                        )
+                    );
+
+        if($user_db == null) return ["status"=>"failed","reasons"=>"Identity not found."];
+
+        $u_details = $user_db[0];
+
+        if(password_verify($password,$u_details->password)) {
+            $u_level    = $this->get_usergroup($u_details->level);
+            $jenis      = $u_level->description;
+
+            $newdata = array(
+                        "siflab_user_level" => $u_level->id,
+                        "siflab_unique_code" => $uniqueid,
+                        "siflab_last_login" => date('Y-m-d H:m:s', time())
+                    );
+            $user_data = array();
+
+            switch($u_level->id) {
+                case 1:
+
+                    break;
+                case 4:
+                    $query = $this->m_query->select(
+                                [
+                                    "table" => 't_mahasiswa',
+                                    "fields" => "*",
+                                    "joins" => [
+                                        't_jurusan' => [
+                                            "on" => ["t_jurusan.kode_jurusan"=>"t_mahasiswa.kode_jurusan"]
+                                        ]
+                                    ],
+                                    "conditions" => ['nim' => $identity],
+                                ]
+                            )[0];
+
+                    $user_data = array(
+                        "siflab_mhs_nim" => $query->nim,
+                        "siflab_mhs_name" => $query->nama,
+                        "siflab_kode_jurusan" => $query->kode_jurusan,
+                        "siflab_nama_jurusan" => $query->nama_jurusan,
+                    );
+
+                    break;
+                default:
+                    return false;
+            }
+            //array_merge($newdata,$user_data)
+            return ["status"=>"ok","data"=>array_merge($newdata,$user_data)];
+        } else {
+            return ["status"=>"failed","reasons"=>"Password are incorrenct."];
+        }
+    }
 }
