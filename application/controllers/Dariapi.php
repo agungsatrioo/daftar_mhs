@@ -48,9 +48,15 @@ class DariApi extends MY_Controller {
 
         $table->set_heading(["NIM", "Nama", "Jenis Kelamin", "Tanggal Lahir", "Jurusan", "Aksi"]);
 
-        $url = base_url("apimhs");
-        $json = file_get_contents($url);
-        $json = json_decode($json);
+        $ch = curl_init(base_url("apimhs"));
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+            'Content-Type: application/json')
+        );
+
+        $result = curl_exec($ch);
+        $json = json_decode($result);
 
         $row = [];
 
@@ -192,7 +198,7 @@ class DariApi extends MY_Controller {
         if($ret=="success") $this->session->set_flashdata('success', "Data mahasiswa telah ditambahkan.");
         else $this->session->set_flashdata('error', "Data mahasiswa gagal ditambahkan.");
 
-        //redirect(base_url("dariapi"));
+        redirect(base_url("dariapi"));
     }
 
 

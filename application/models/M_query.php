@@ -25,7 +25,7 @@ class M_query extends CI_Model {
 			return $query;
 	}
     
-    public function select( $details = array(), $check_query = FALSE, $count = FALSE, $escape = TRUE ){	
+    public function select( $details = array(), $check_query = TRUE, $count = FALSE, $escape = TRUE ){
 		$ret = array();
 		
 		try{
@@ -153,10 +153,12 @@ class M_query extends CI_Model {
 			else
 				$query = $this->dbase->get( $table );
 				
+            /*
 			if( $check_query )
 				echo $this->dbase->last_query();
 			else
-				$this->dbase->save_queries = FALSE; 
+				$this->dbase->save_queries = TRUE;
+                */
 				
 			if( !$query )
 				$ret = $this->get_error();
@@ -177,7 +179,7 @@ class M_query extends CI_Model {
 		$tablename = '', 
 		$details = array(), 
 		$return_id = FALSE, 
-		$check_query = FALSE 
+		$check_query = TRUE
 	){			
 		$result = array();
 		
@@ -201,7 +203,7 @@ class M_query extends CI_Model {
 		return $result;
 	}
 	
-	public function insert_batch( $tablename = '', $details = array(), $check_query = false ){
+	public function insert_batch( $tablename = '', $details = array(), $check_query = true ){
 		$query = array();
 		
 		try{
@@ -218,7 +220,7 @@ class M_query extends CI_Model {
 		return $query;
 	}
 	
-	public function update( $tablename = '', $conditions = array(), $details = array(), $check_query = false ){	
+	public function update( $tablename = '', $conditions = array(), $details = array(), $check_query = true ){
 		$res = array();
 		
 		try{
@@ -239,7 +241,7 @@ class M_query extends CI_Model {
 		return $res;
 	}
 	
-	public function delete( $tablename = '', $conditions, $check_query = false ){
+	public function delete( $tablename = '', $conditions, $check_query = true ){
 		$res = array();
 		
 		try{

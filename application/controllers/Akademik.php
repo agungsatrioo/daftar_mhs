@@ -132,14 +132,15 @@ class Akademik extends MY_Controller {
     }
 
     public function add() {
+        redirect(base_url());
+
         $post = $this->input->post();
         $ret = $this->alterable() ? $this->db->insert("t_mahasiswa", $post) : true;
 
         if($ret) $this->session->set_flashdata('success', "Data mahasiswa telah ditambahkan.");
         else $this->session->set_flashdata('error', "Data mahasiswa gagal ditambahkan.");
 
-        redirect(base_url());
-    }
 
+    }
 
 }

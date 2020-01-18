@@ -18,13 +18,12 @@ class Apimhs extends REST_Controller {
     function __construct($config = 'rest') {
         parent::__construct($config);
         $this->load->model(["M_mhs"=>"mhs"]);
-        
     }
 
     private function alterable() {
         // BACA YA!
         // Jadiin true kalo mau ada fungsi edit/delete.
-        return true;
+        return false;
     }
 
     //READ
@@ -37,22 +36,32 @@ class Apimhs extends REST_Controller {
 
     //DELETE
     function index_delete() {
+        $db_debug = $this->db->db_debug; //save setting
+        $this->db->db_debug = FALSE; //disable debugging for queries
+
         $nim = $this->delete("nim");
 
-        $delete = $this->alterable() ? $this->db->delete("t_mahasiswa", ["nim" => $nim]) : true;
+        if($this->alterable()) {
+            $query = $this->db->delete("t_mahasiswa", ["nim" => $nim]);
 
-        if ($nim!=null && $delete) {
-            $this->response(array('status' => 'success'), 201);
-        } else {
-            if($nim==null) $this->response(array('status' => 'fail', 502, "Tidak ada parameter 'nim'"));
-            elseif(!$delete) {
-                $this->response(array('status' => 'fail', 502, 'Query gagal.'));
+            if(!$query) {
+                $error = $this->db->error();
+                $this->response(array('status' => 'fail', 502, 'Query gagal.', "cause"=> $error));
+            } else {
+                $this->response(array('status' => 'success'), 201);
             }
+        } else {
+            $this->response(array('status' => 'success'), 201);
         }
+
+        $this->db->db_debug = $db_debug; //restore setting
     }
 
     //CREATE
     function index_post() {
+        $db_debug = $this->db->db_debug; //save setting
+        $this->db->db_debug = FALSE; //disable debugging for queries
+
         $post = [
             "nim"           => $this->post('nim'),
             "nama"          => $this->post('nama'),
@@ -64,18 +73,27 @@ class Apimhs extends REST_Controller {
             "nik_dospem"  => 2,
         ];
 
-        $ret = $this->alterable() ? $this->db->insert("t_mahasiswa", $post) : true;
+        if($this->alterable()) {
+            $query = $this->db->insert("t_mahasiswa", $post);
 
-        if ($ret) {
-            $this->response(array('status' => 'success'), 201);
+            if(!$query) {
+                $error = $this->db->error();
+                $this->response(array('status' => 'fail', 502, 'Query gagal.', "cause"=> $error));
+            } else {
+                $this->response(array('status' => 'success'), 201);
+            }
         } else {
-            $this->response(array('status' => 'fail', 502, 'Query gagal.', "cause"=> $ret));
+            $this->response(array('status' => 'success'), 201);
         }
+
+        $this->db->db_debug = $db_debug; //restore setting
     }
 
     //UPDATE
     function index_put() {
         $id = $this->put('nim');
+        $db_debug = $this->db->db_debug; //save setting
+        $this->db->db_debug = FALSE; //disable debugging for queries
 
         $post = [
             "nim"           => $this->put('nim'),
@@ -87,13 +105,19 @@ class Apimhs extends REST_Controller {
             "kode_jurusan"  => $this->put('kode_jurusan'),
         ];
 
-        $ret = $this->alterable() ? $this->db->update("t_mahasiswa", $post, ["nim" => $id]) : true;
+        if($this->alterable()) {
+            $query = $this->db->update("t_mahasiswa", $post, ["nim" => $id]);
 
-        if ($ret) {
-            $this->response(array('status' => 'success'), 201);
+            if(!$query) {
+                $error = $this->db->error();
+                $this->response(array('status' => 'fail', 502, 'Query gagal.', "cause"=> $error));
+            } else {
+                $this->response(array('status' => 'success'), 201);
+            }
         } else {
-
-            $this->response(array('status' => 'fail', 502, 'Query gagal.', "cause"=> $ret));
+            $this->response(array('status' => 'success'), 201);
         }
+
+        $this->db->db_debug = $db_debug; //restore setting
     }
 }
