@@ -154,7 +154,7 @@ class M_user extends CI_Model {
                         )
                     );
 
-        if($user_db == null) return ["status"=>"failed","reasons"=>"Identity not found."];
+        if($user_db == null) return ["status"=>"failed","code"=>401,"reasons"=>"Identity not found."];
 
         $u_details = $user_db[0];
 
@@ -199,9 +199,9 @@ class M_user extends CI_Model {
                     return false;
             }
             //array_merge($newdata,$user_data)
-            return ["status"=>"ok","data"=>array_merge($newdata,$user_data)];
+            return ["status"=>"ok","code"=>200,"data"=>array_merge($newdata,$user_data)];
         } else {
-            return ["status"=>"failed","reasons"=>"Password are incorrenct."];
+            return ["status"=>"failed","code"=>401,"reasons"=>"Password are incorrenct."];
         }
     }
 }
