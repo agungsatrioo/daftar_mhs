@@ -30,7 +30,7 @@ class Inputapi extends REST_Controller {
 
         if($type=="login") {
             $details = $this->user->login_api($this);
-            $this->response($details, $details["code"]);
+            $this->response($details, 200);
 
             //$this->response("you want to login?", 200);
         }
