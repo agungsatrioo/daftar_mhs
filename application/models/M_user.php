@@ -188,8 +188,8 @@ class M_user extends CI_Model {
                             )[0];
 
                     $user_data = array(
-                        "siflab_mhs_nim" => $query->nim,
-                        "siflab_mhs_name" => $query->nama,
+                        "siflab_user_identity" => $query->nim,
+                        "siflab_user_fullname" => $query->nama,
                         "siflab_kode_jurusan" => $query->kode_jurusan,
                         "siflab_nama_jurusan" => $query->nama_jurusan,
                     );
