@@ -37,6 +37,16 @@ class M_user extends CI_Model {
 		}
 	}
 
+    function change_key( $array, $old_key, $new_key ) {
+        if( ! array_key_exists( $old_key, $array ) )
+            return $array;
+
+        $keys = array_keys( $array );
+        $keys[ array_search( $old_key, $keys ) ] = $new_key;
+
+        return array_combine( $keys, $array );
+    }
+
     public function user() {
         if($this->session->has_userdata("siflab_unique_code")&&$this->session->has_userdata("siflab_user_level")) {
             return $this->session;
@@ -76,72 +86,8 @@ class M_user extends CI_Model {
         $this->session->sess_destroy();
     }
 
-    public function login($input) {
-        $identity   = $input->post('inputNI');
-        $password   = $input->post('inputPassword');
-        $uniqueid   = $this->security->get_csrf_hash();
-
-        $user_db  = $this->m_query->select(
-                        array(
-                            'table' => 't_pengguna',
-                            'conditions' => array(
-                                'identity' => $identity,
-                            )
-                        )
-                    );
-
-        if($user_db == null) return false;
-
-        $u_details = $user_db[0];
-        if(password_verify($password,$u_details->password)) {
-            $u_level    = $this->get_usergroup($u_details->level);
-            $jenis      = $u_level->description;
-
-            $newdata = array(
-                        "siflab_user_level" => $u_level->id,
-                        "siflab_unique_code" => $uniqueid,
-                        "siflab_last_login" => date('Y-m-d H:m:s', time())
-                    );
-            $user_data = array();
-
-            switch($u_level->id) {
-                case 1:
-
-                    break;
-                case 4:
-                    $query = $this->m_query->select(
-                                [
-                                    "table" => 't_mahasiswa',
-                                    "fields" => "*",
-                                    "joins" => [
-                                        't_jurusan' => [
-                                            "on" => ["t_jurusan.kode_jurusan"=>"t_mahasiswa.kode_jurusan"]
-                                        ]
-                                    ],
-                                    "conditions" => ['nim' => $identity],
-                                ]
-                            )[0];
-
-                    $user_data = array(
-                        "siflab_mhs_nim" => $query->nim,
-                        "siflab_mhs_name" => $query->nama,
-                        "siflab_kode_jurusan" => $query->kode_jurusan,
-                        "siflab_nama_jurusan" => $query->nama_jurusan,
-                    );
-
-                    break;
-                default:
-                    return false;
-            }
-            $this->session->set_userdata(array_merge($newdata,$user_data));
-            return true;
-        } else {
-            return false;
-        }
-    }
-
     public function login_api($input) {
-        $identity   = $input->post('ni');
+        $identity   = $input->post('identity');
         $password   = $input->post('password');
         $uniqueid   = $this->security->get_csrf_hash();
 
@@ -154,7 +100,7 @@ class M_user extends CI_Model {
                         )
                     );
 
-        if($user_db == null) return ["status"=>"failed","code"=>401,"reasons"=>"Identity not found."];
+        if($user_db == null) return ["status"=>"failed","code"=>401,"msg"=>"Identity not found."];
 
         $u_details = $user_db[0];
 
@@ -163,9 +109,9 @@ class M_user extends CI_Model {
             $jenis      = $u_level->description;
 
             $newdata = array(
-                        "siflab_user_level" => $u_level->id,
-                        "siflab_unique_code" => $uniqueid,
-                        "siflab_last_login" => date('Y-m-d H:m:s', time())
+                        "user_level" => $u_level->id,
+                        "unique_code" => $uniqueid,
+                        "last_login" => date('Y-m-d H:m:s', time())
                     );
             $user_data = array();
 
@@ -174,25 +120,11 @@ class M_user extends CI_Model {
 
                     break;
                 case 4:
-                    $query = $this->m_query->select(
-                                [
-                                    "table" => 't_mahasiswa',
-                                    "fields" => "*",
-                                    "joins" => [
-                                        't_jurusan' => [
-                                            "on" => ["t_jurusan.kode_jurusan"=>"t_mahasiswa.kode_jurusan"]
-                                        ]
-                                    ],
-                                    "conditions" => ['nim' => $identity],
-                                ]
-                            )[0];
+                    $this->load->model(["M_mhs"=>"mhs"]);
 
-                    $user_data = array(
-                        "siflab_user_identity" => $query->nim,
-                        "siflab_user_fullname" => $query->nama,
-                        "siflab_kode_jurusan" => $query->kode_jurusan,
-                        "siflab_nama_jurusan" => $query->nama_jurusan,
-                    );
+                    $query = $this->mhs->get_mhs($identity);
+
+                    $user_data = get_object_vars($query[0]);
 
                     break;
                 default:
@@ -201,7 +133,9 @@ class M_user extends CI_Model {
             //array_merge($newdata,$user_data)
             return ["status"=>"ok","code"=>200,"data"=>array_merge($newdata,$user_data)];
         } else {
-            return ["status"=>"failed","code"=>401,"reasons"=>"Password are incorrenct."];
+            return ["status"=>"failed","code"=>401,"msg"=>"Password are incorrect."];
         }
     }
+
+
 }
