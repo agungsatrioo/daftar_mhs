@@ -31,7 +31,7 @@ class Inputapi extends REST_Controller {
         // JWT library throws exception if the token is not valid
         try {
             // Extract the token
-            $token = $headers['Authorization'];
+            $token = $headers['authorization'];
             // Validate the token
             // Successfull validation will return the decoded user data else returns false
             $data = AUTHORIZATION::validateToken($token);
@@ -46,7 +46,7 @@ class Inputapi extends REST_Controller {
         } catch (Exception $e) {
             // Token is invalid
             // Send the unathorized access message
-            $status = parent::HTTP_UNAUTHORIZED;
+            $status = 501;
             $response = ['status' => "failed","code"=>$status, 'msg' => 'Access invalid.'];
             $this->response($response, $status);
         }
@@ -63,6 +63,13 @@ class Inputapi extends REST_Controller {
         $id = $this->get('nim');
 
         $kontak = $this->mhs->get_mhs($id);
+        $this->response($kontak, 200);
+    }
+
+    function dosen_get() {
+        $id = $this->get('nik');
+
+        $kontak = $this->mhs->get_dosen($id);
         $this->response($kontak, 200);
     }
 

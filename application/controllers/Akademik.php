@@ -139,8 +139,30 @@ class Akademik extends MY_Controller {
 
         if($ret) $this->session->set_flashdata('success', "Data mahasiswa telah ditambahkan.");
         else $this->session->set_flashdata('error', "Data mahasiswa gagal ditambahkan.");
+    }
 
+    public function querydmp() {
+        $dsn = $this->mhs->get_dosen();
+        $prefix = 100;
 
+        echo "INSERT INTO t_pengguna VALUES<BR>";
+
+        foreach($dsn as $it){
+            $password = password_hash($prefix . $it->nik, PASSWORD_DEFAULT);
+            echo "({$it->nik}, \"$password\", 0, NULL, 0, 5, 0),<br>";
+        }
+    }
+
+    public function mhsku() {
+        $mhs = $this->mhs->mhsfunc();
+
+        echo "<pre>";
+        print_r($mhs);
+
+        /*
+        foreach($mhs as $it) {
+            echo "Mahasiswa: {$it->nim}, <br>Dospem: <hr>";
+        }*/
     }
 
 }

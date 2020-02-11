@@ -116,14 +116,15 @@ class M_user extends CI_Model {
             $user_data = array();
 
             switch($u_level->id) {
-                case 1:
+                case 5:
+                    $this->load->model(["M_mhs"=>"mhs"]);
+                    $query = $this->mhs->get_dosen($identity);
+                    $user_data = get_object_vars($query[0]);
 
                     break;
                 case 4:
                     $this->load->model(["M_mhs"=>"mhs"]);
-
                     $query = $this->mhs->get_mhs($identity);
-
                     $user_data = get_object_vars($query[0]);
 
                     break;
