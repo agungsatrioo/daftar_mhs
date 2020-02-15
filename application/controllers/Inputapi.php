@@ -33,7 +33,6 @@ class Inputapi extends REST_Controller {
         try {
             // Extract the token
             array_change_key_case($headers, CASE_LOWER);
-
             $token = $headers['authorization'];
             // Validate the token
             // Successfull validation will return the decoded user data else returns false
@@ -77,10 +76,10 @@ class Inputapi extends REST_Controller {
     }
 
     function auth_post() {
-        if(!empty($this->_verify())) {
+        //if(!empty($this->_verify())) {
             $details = $this->user->login_api($this);
             $this->response($details, 200);
-        }
+        //}
     }
 
     function up_get() {
