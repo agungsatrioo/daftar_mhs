@@ -142,15 +142,62 @@ class Akademik extends MY_Controller {
     }
 
     public function querydmp() {
-        $dsn = $this->mhs->get_dosen();
-        $prefix = 100;
+        echo "INSERT INTO t_status_sidang VALUES<BR>";
 
-        echo "INSERT INTO t_pengguna VALUES<BR>";
+        //131 - 258: PEMBIMBING MUNAQOSAH
+        //259 - 386: PENGUJI UP
+        //387 - 514: PENGUJI KOMPRE
+        //643 - 770: PENGUJI MUNAQOSAH
 
-        foreach($dsn as $it){
-            $password = password_hash($prefix . $it->nik, PASSWORD_DEFAULT);
-            echo "({$it->nik}, \"$password\", 0, NULL, 0, 5, 0),<br>";
+        /*
+select t_status_sidang.id_status, t_mahasiswa.nim, nama, judul_proposal, id_ruang, tgl_jadwal_sidang, nama_kelompok_sidang, nilai from t_u_proposal
+join t_status_sidang on t_status_sidang.id_status = t_u_proposal.id_status_sidang
+join t_status on t_status_sidang.id_status = t_status.id_status
+join t_sidang on t_status_sidang.id_sidang = t_sidang.id_sidang
+join t_mahasiswa on t_status.nim = t_mahasiswa.nim
+join t_kelompok_sidang on t_sidang.id_kelompok_sidang = t_kelompok_sidang.id_kelompok_sidang
+join t_ruangan on t_sidang.id_ruangan = t_ruangan.id_ruang
+join t_jadwal_sidang on t_sidang.id_jadwal_sidang = t_jadwal_sidang.id_jadwal_sidang
+left join t_nilai on t_status_sidang.id_status = t_nilai.id_status
+        */
+
+        $j = 30;
+
+        for($i=643; $i<=770; $i++) {
+            if($i%8==0) $j++;
+            echo "($i, $j),<br>";
         }
+    }
+
+    public function myz() {
+        echo "INSERT INTO t_u_munaqosah VALUES<BR>";
+
+        $j=0;
+
+        for($i=259; $i<=386; $i++) {
+            $j++;
+            echo "(NULL, $i, 'Munaqosah $j'),<br>";
+        }
+
+    }
+
+    public function myq() {
+        $mhs = $this->mhs->mhsfunc();
+        $dsn = $this->mhs->get_dosen();
+
+        echo "INSERT INTO t_status VALUES<BR>";
+        $j = 1;
+        $type = 21;
+
+        foreach($mhs as $it) {
+            $j++;
+            if( $j==2 || $j%5==0) {
+                $r = array_rand($dsn);
+                $q = $dsn[$r];
+            }
+            echo "(NULL, $type, {$it->user_identity}, {$q->user_identity}),<br>";
+        }
+
     }
 
     public function mhsku() {

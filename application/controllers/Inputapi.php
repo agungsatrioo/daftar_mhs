@@ -15,6 +15,7 @@ class Inputapi extends REST_Controller {
         parent::__construct($config);
         $this->load->model(["M_mhs"=>"mhs"]);
         $this->load->model(["M_user"=>"user"]);
+        $this->load->model(["M_akademik"=>"acd"]);
         $this->load->helper(['jwt', 'authorization']);
     }
 
@@ -31,6 +32,8 @@ class Inputapi extends REST_Controller {
         // JWT library throws exception if the token is not valid
         try {
             // Extract the token
+            array_change_key_case($headers, CASE_LOWER);
+
             $token = $headers['authorization'];
             // Validate the token
             // Successfull validation will return the decoded user data else returns false
@@ -78,6 +81,20 @@ class Inputapi extends REST_Controller {
             $details = $this->user->login_api($this);
             $this->response($details, 200);
         }
+    }
+
+    function up_get() {
+        $id = $this->get('nik');
+
+        $kontak = $this->acd->upemqsh("proposal",$id);
+        $this->response($kontak, 200);
+    }
+
+    function munaqosah_get() {
+        $id = $this->get('nik');
+
+        $kontak = $this->acd->upemqsh("munaqosah",$id);
+        $this->response($kontak, 200);
     }
 
     public function hello_get() {

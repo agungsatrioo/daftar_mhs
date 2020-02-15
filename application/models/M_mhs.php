@@ -18,7 +18,7 @@ class M_mhs extends CI_Model {
     }
 
     public function mhsfunc($nim = 0) {
-    $arr = ["mhs.nim as user_identity","mhs.nama as user_name","mhs.jk","mhs.tempat_lahir", "mhs.tanggal_lahir", "tanggal_masuk", "nama_jurusan", "mhs.kode_jurusan", " CONCAT(dsn.nama_dosen,', ', dsn.gelar) as nama_dospem"];
+    $arr = ["mhs.nim as user_identity","nama_mhs as user_name","mhs.jk","mhs.tempat_lahir", "mhs.tanggal_lahir", "tanggal_masuk", "nama_jurusan", "mhs.kode_jurusan", " CONCAT(dsn.nama_dosen,', ', dsn.gelar) as nama_dospem"];
 
         $builder = [
                         "table" => 't_status',
