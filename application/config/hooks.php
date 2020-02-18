@@ -12,12 +12,14 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 |
 */
 
+/*
 $hook['display_override'][] = array(
     'class' => '',
     'function' => 'CI_Minifier_Hook_Loader',
     'filename' => '',
     'filepath' => ''
 );
+*/
 
 $hook['post_system'] = array(     // 'post_controller' indicated execution of hooks after controller is finished
     'class' => 'Db_log',             // Name of Class
