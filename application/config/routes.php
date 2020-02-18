@@ -49,6 +49,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 | Examples:	my-controller/index	-> my_controller/index
 |		my-controller/my-method	-> my_controller/my_method
 */
-$route['default_controller'] = 'akademik';
+$route['default_controller'] = 'inputapi';
 $route['404_override'] = 'my_controller/make_404';
 $route['translate_uri_dashes'] = FALSE;
