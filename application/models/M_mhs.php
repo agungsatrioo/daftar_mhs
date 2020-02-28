@@ -17,13 +17,34 @@ class M_mhs extends CI_Model {
         return $this->mhsfunc($nim);
     }
 
+    public function mhsku($nim = 0) {
+         $arr = ["mhs.nim as user_identity","nama_mhs as user_name","mhs.jk","mhs.tempat_lahir", "mhs.tanggal_lahir", "tanggal_masuk", "nama_jurusan", "mhs.kode_jurusan"];
+
+        $builder = [
+                        "table" => 't_mahasiswa mhs',
+                        "fields" => $arr,
+                        "joins" => [
+                            't_jurusan' => [
+                                "on" => ["t_jurusan.kode_jurusan"=>"mhs.kode_jurusan",]
+                            ],
+                        ]
+                    ];
+
+        if($nim > 0) $builder["conditions"] += ['mhs.nim' => $nim];
+
+        $query = $this->m_query->select($builder);
+
+        return $query;
+    }
+
     public function mhsfunc($nim = 0) {
     $arr = ["mhs.nim as user_identity","nama_mhs as user_name","mhs.jk","mhs.tempat_lahir", "mhs.tanggal_lahir", "tanggal_masuk", "nama_jurusan", "mhs.kode_jurusan", " CONCAT(dsn.nama_dosen,', ', dsn.gelar) as nama_dospem"];
 
         $builder = [
                         "table" => 't_status',
                         "fields" => $arr,
-                        "conditions" => ["t_status.id_jenis_status"=>15],
+                        "order" => "mhs.nim",
+                        "conditions" => ["t_status.id_jenis_status"=>1],
                         "joins" => [
                             "t_mahasiswa mhs" => [
                                 "on" => ["mhs.nim" => "t_status.nim"]

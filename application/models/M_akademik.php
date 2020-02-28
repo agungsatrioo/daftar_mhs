@@ -3,10 +3,26 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class M_akademik extends CI_Model {
 
-    public function upemqsh($table, $nik = 0) {
+    private function _mutu($n) {
+        if($n > 78 && $n <=100) {
+            return "A";
+        } elseif($n > 67 && $n >= 78) {
+            return "B";
+        } elseif($n > 56 && $n >= 67) {
+            return "C";
+        } elseif($n > 41 && $n >= 56) {
+            return "D";
+        } elseif($n > 0 && $n >= 41) {
+            return "E";
+        } else {
+            return "null";
+        }
+    }
+
+    public function upemqsh($table, $nik = 0, $nim = 0) {
         setlocale(LC_ALL, 'id_id');
 
-        $arr = ["s_sidang.id_status","mhs.nim","nama_mhs","dsn.nik","CONCAT(dsn.nama_dosen,', ', dsn.gelar) as nama_dosen", "judul_$table", "tgl_jadwal_sidang as sidang_date_fmtd", "tgl_jadwal_sidang as sidang_date", "nama_kelompok_sidang", "nilai"];
+        $arr = ["s_sidang.id_status","mhs.nim","nama_mhs","dsn.nik","CONCAT(dsn.nama_dosen,', ', dsn.gelar) as nama_dosen", "judul_$table", "tgl_jadwal_sidang as sidang_date_fmtd", "tgl_jadwal_sidang as sidang_date", "ruangan.kode_ruang", "nama_kelompok_sidang", "nilai"];
 
         /*
 select t_status_sidang.id_status, t_mahasiswa.nim, nama_mhs, judul_proposal, id_ruang, tgl_jadwal_sidang, nama_kelompok_sidang, nilai from t_u_proposal
@@ -23,7 +39,7 @@ left join t_nilai on t_status_sidang.id_status = t_nilai.id_status
 
         $builder = [
                         "table" => "t_u_$table",
-                        "conditions" => $nik>0 ? ["dsn.nik" => $nik] : [],
+                        "conditions" => ($nik>0 ? ["dsn.nik" => $nik] : []) + ($nim>0 ? ["mhs.nim" => $nim] : []),
                         "fields" => $arr,
                         "joins" => [
                             "t_status_sidang s_sidang" => [
@@ -66,5 +82,33 @@ left join t_nilai on t_status_sidang.id_status = t_nilai.id_status
 
 
         return $query;
+    }
+
+    public function cek_id_status($id) {
+        $builder = [
+            "table"     => "t_status",
+            "fields"    => "id_status",
+            "conditions"=> ["id_status" => $id]
+        ];
+
+        $query = $this->m_query->select($builder);
+
+        if(count($query) > 0) return true;
+        else return false;
+    }
+
+    public function func_input_nilai($status, $nilai) {
+        if($this->cek_id_status($status)) {
+            $this->m_query->insert(
+                "t_nilai",
+                [
+                    "id_status" => $status,
+                    "nilai"     => $nilai,
+                    "mutu"      => $this->_mutu($nilai)
+                ],
+                false
+            );
+            return true;
+        } else return false;
     }
 }

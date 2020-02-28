@@ -179,7 +179,7 @@ class M_query extends CI_Model {
 		$tablename = '', 
 		$details = array(), 
 		$return_id = FALSE, 
-		$check_query = TRUE
+		$check_query = FALSE
 	){			
 		$result = array();
 		

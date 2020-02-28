@@ -144,29 +144,86 @@ class Akademik extends MY_Controller {
     public function querydmp() {
         echo "INSERT INTO t_status_sidang VALUES<BR>";
 
-        //131 - 258: PEMBIMBING MUNAQOSAH
-        //259 - 386: PENGUJI UP
-        //387 - 514: PENGUJI KOMPRE
-        //643 - 770: PENGUJI MUNAQOSAH
+                /*
+        select id_jenis_status, min(id_status), max(id_status)
+from t_status
+GROUP by id_jenis_status
 
-        /*
-select t_status_sidang.id_status, t_mahasiswa.nim, nama, judul_proposal, id_ruang, tgl_jadwal_sidang, nama_kelompok_sidang, nilai from t_u_proposal
-join t_status_sidang on t_status_sidang.id_status = t_u_proposal.id_status_sidang
-join t_status on t_status_sidang.id_status = t_status.id_status
-join t_sidang on t_status_sidang.id_sidang = t_sidang.id_sidang
-join t_mahasiswa on t_status.nim = t_mahasiswa.nim
-join t_kelompok_sidang on t_sidang.id_kelompok_sidang = t_kelompok_sidang.id_kelompok_sidang
-join t_ruangan on t_sidang.id_ruangan = t_ruangan.id_ruang
-join t_jadwal_sidang on t_sidang.id_jadwal_sidang = t_jadwal_sidang.id_jadwal_sidang
-left join t_nilai on t_status_sidang.id_status = t_nilai.id_status
+        1 	1 	    128 //Pembimbing akademik
+
+        3 	129 	256 //mq1p
+        4 	257 	384 //mq2p
+
+        6 	385 	512 //up1
+        7 	513 	640 //up2
+
+        8 	641 	768 //p1
+        9 	769 	896 //p2
+        10 	897 	1024 //m3
+
+        11 	1025 	1152 //mq1u
+        12 	1153 	1280 //mq2u
+
         */
 
-        $j = 30;
+        $a = 897;
+        $b = 1024;
 
-        for($i=643; $i<=770; $i++) {
-            if($i%8==0) $j++;
+        $j = 50;
+
+        for($i=$a; $i<=$b; $i++) {
+            if($i%3==0) $j++;
             echo "($i, $j),<br>";
         }
+    }
+
+        public function upe() {
+        echo "INSERT INTO t_u_kompre VALUES<BR>";
+
+                /*
+        select id_jenis_status, min(id_status), max(id_status)
+from t_status
+GROUP by id_jenis_status
+
+        1 	1 	    128 //Pembimbing akademik
+
+        3 	129 	256 //mq1p
+        4 	257 	384 //mq2p
+
+        6 	385 	512 //up1
+        7 	513 	640 //up2
+
+        8 	641 	768 //kmpre1
+        9 	769 	896 //kompre2
+        10 	897 	1024 //kompre3
+
+        11 	1025 	1152 //mq1u
+        12 	1153 	1280 //mq2u
+
+        */
+
+            $a = 641;
+            $b = 768;
+
+                $oa = [[641,768],[769,896],[897,1024]];
+                $arr = [];
+                //
+
+
+
+            for($i=$a; $i<=$b; $i++) {
+                $m = rand(1, 12);
+                $d = rand(1, 28);
+                $arr[] = "2020-$m-$d";
+            }
+
+            foreach($oa as $bb) {
+                $o = 0;
+                for($i=$bb[0]; $i<=$bb[1]; $i++) {
+                    echo "(NULL, $i, '{$arr[$o]}'),<br>";
+                    $o++;
+                }
+            }
     }
 
     public function myz() {
@@ -182,20 +239,69 @@ left join t_nilai on t_status_sidang.id_status = t_nilai.id_status
     }
 
     public function myq() {
-        $mhs = $this->mhs->mhsfunc();
-        $dsn = $this->mhs->get_dosen();
+
+        /*
+        select id_jenis_status, min(id_status), max(id_status)
+from t_status
+GROUP by id_jenis_status
+
+        1 	1 	    128 //Pembimbing akademik
+
+        3 	129 	256 //mq1p
+        4 	257 	384 //mq2p
+
+        6 	385 	512 //up1
+        7 	513 	640 //up2
+
+        8 	641 	768 //p1
+        9 	769 	896 //p2
+        10 	897 	1024 //m3
+
+        11 	1025 	1152 //mq1u
+        12 	1153 	1280 //mq2u
+
+        */
 
         echo "INSERT INTO t_status VALUES<BR>";
-        $j = 1;
-        $type = 21;
+        $j = 0;
+        $utype = [1, 3, 4, 6, 7, 8, 9, 10, 11, 12];
+        $q = 0;
 
-        foreach($mhs as $it) {
-            $j++;
-            if( $j==2 || $j%5==0) {
-                $r = array_rand($dsn);
-                $q = $dsn[$r];
+        foreach ($utype as $type) {
+            $mhs = $this->mhs->mhsku();
+            $dsn = $this->mhs->get_dosen();
+
+            foreach($mhs as $it) {
+                if($j%3==0) {
+                    $r = array_rand($dsn);
+                    $q = $dsn[$r];
+                }
+                $j++;
+                echo "(NULL, $type, {$it->user_identity}, {$q->user_identity}),<br>";
+                unset($dsn[$r]);
             }
-            echo "(NULL, $type, {$it->user_identity}, {$q->user_identity}),<br>";
+        }
+
+
+    }
+
+    public function sidang() {
+        echo "INSERT INTO t_sidang VALUES<BR>";
+
+        $ruangan = [2,3,4];
+        $jadwal = 0;
+        $kelompok = 0;
+        $d = -1;
+
+        for($i=0; $i<=100; $i++) {
+            $d++;
+            if($jadwal > 10) $jadwal = 0;
+            if($kelompok > 14) $kelompok = 0;
+            if($d > 2) $d = 0;
+            $jadwal++;
+            $kelompok++;
+
+            echo "(NULL, {$jadwal}, {$kelompok}, {$ruangan[$d]}),<br>";
         }
 
     }
@@ -210,6 +316,10 @@ left join t_nilai on t_status_sidang.id_status = t_nilai.id_status
         foreach($mhs as $it) {
             echo "Mahasiswa: {$it->nim}, <br>Dospem: <hr>";
         }*/
+    }
+
+    public function bimbingan() {
+
     }
 
 }

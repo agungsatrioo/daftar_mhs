@@ -83,14 +83,15 @@ class Inputapi extends REST_Controller {
     }
 
     function up_get() {
-        $id = $this->get('nik');
+        $id = $this->get('dosen');
+        $mhs = $this->get('mahasiswa');
 
-        $kontak = $this->acd->upemqsh("proposal",$id);
+        $kontak = $this->acd->upemqsh("proposal",$id, $mhs);
         $this->response($kontak, 200);
     }
 
     function munaqosah_get() {
-        $id = $this->get('nik');
+        $id = $this->get('dosen');
 
         $kontak = $this->acd->upemqsh("munaqosah",$id);
         $this->response($kontak, 200);
@@ -108,4 +109,33 @@ class Inputapi extends REST_Controller {
         // REST_Controller provide this method to send responses
         $this->response($response, $status);
     }
+
+    public function status_get() {
+        $id = $this->get("id");
+
+        $f = $this->acd->cek_id_status($id);
+
+        $this->response(["result" => $f], 200);
+    }
+
+    public function input_nilai_post() {
+        $id     = $this->post("id_status");
+        $nilai  = $this->post("nilai");
+
+        if(!is_numeric($nilai)) {
+            $this->response(["error" => "The value you entered is not a number."], 400);
+        } else {
+            if($nilai > 0 && $nilai <= 100) {
+
+                if($this->acd->func_up_input_nilai($id, $nilai)) {
+                    $this->response(["info" => "ok"], 200);
+                } else {
+                    $this->response(["error" => "Error when inputting!"], 400);
+                }
+            } else {
+                $this->response(["error" => "Please enter 0-100. Value you entered is: $nilai"], 400);
+            }
+        }
+    }
+
 }
