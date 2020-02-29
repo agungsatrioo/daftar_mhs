@@ -120,6 +120,7 @@ class Inputapi extends REST_Controller {
 
     public function input_nilai_post() {
         $id     = $this->post("id_status");
+        //
         $nilai  = $this->post("nilai");
 
         if(!is_numeric($nilai)) {
