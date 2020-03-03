@@ -207,9 +207,6 @@ GROUP by id_jenis_status
 
                 $oa = [[641,768],[769,896],[897,1024]];
                 $arr = [];
-                //
-
-
 
             for($i=$a; $i<=$b; $i++) {
                 $m = rand(1, 12);
@@ -224,6 +221,10 @@ GROUP by id_jenis_status
                     $o++;
                 }
             }
+    }
+
+    public function t_st_sidang() {
+        echo "INSERT INTO t_u_munaqosah VALUES<BR>";
     }
 
     public function myz() {

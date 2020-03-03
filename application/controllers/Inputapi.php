@@ -87,6 +87,12 @@ class Inputapi extends REST_Controller {
         $mhs = $this->get('mahasiswa');
 
         $kontak = $this->acd->upemqsh("proposal",$id, $mhs);
+
+        foreach($kontak as $key=>$item) {
+            $status = $this->acd->get_status_dosen($item->nim, "Penguji Sidang Proposal %");
+            $item->penguji = $status;
+        }
+
         $this->response($kontak, 200);
     }
 
@@ -94,7 +100,37 @@ class Inputapi extends REST_Controller {
         $id = $this->get('dosen');
 
         $kontak = $this->acd->upemqsh("munaqosah",$id);
+
         $this->response($kontak, 200);
+    }
+
+    function nilai_up_get() {
+        $mhs = $this->get('nim');
+
+        $kontak = $this->acd->lihat_nilai("proposal", $mhs);
+
+        foreach($kontak as $key=>$item) {
+            $status = $this->acd->get_status_dosen($item->nim, "Penguji Sidang Proposal %");
+
+            $item->penguji = $status;
+        }
+
+        $this->response($kontak[0], 200);
+    }
+
+    function cek_nilai_get() {
+        $id = $this->get('status');
+
+        $kontak = $this->acd->cek_nilai($id);
+
+        foreach($kontak as $key=>$item) {
+            $item->color = $this->acd->warna($item->nilai);
+        }
+
+        if(empty($kontak)) $kontak = [["nilai" => "Belum ada", "mutu" => "Belum ada", "color" => "#000000"]];
+
+        $this->response($kontak, 200);
+
     }
 
     public function hello_get() {
@@ -120,7 +156,6 @@ class Inputapi extends REST_Controller {
 
     public function input_nilai_post() {
         $id     = $this->post("id_status");
-        //
         $nilai  = $this->post("nilai");
 
         if(!is_numeric($nilai)) {
@@ -128,7 +163,7 @@ class Inputapi extends REST_Controller {
         } else {
             if($nilai > 0 && $nilai <= 100) {
 
-                if($this->acd->func_up_input_nilai($id, $nilai)) {
+                if($this->acd->func_input_nilai($id, $nilai)) {
                     $this->response(["info" => "ok"], 200);
                 } else {
                     $this->response(["error" => "Error when inputting!"], 400);
