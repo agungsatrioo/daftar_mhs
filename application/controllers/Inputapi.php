@@ -28,8 +28,6 @@ class Inputapi extends REST_Controller {
     private function _verify() {
         // Get all the headers
         $headers = $this->input->request_headers();
-
-        print_r($headers);
         // Use try-catch
         // JWT library throws exception if the token is not valid
         try {
