@@ -34,8 +34,7 @@ class Inputapi extends REST_Controller {
         // JWT library throws exception if the token is not valid
         try {
             // Extract the token
-            array_change_key_case($headers, CASE_LOWER);
-            $token = $headers['authorization'];
+            $token = $headers['Authorization'];
             // Validate the token
             // Successfull validation will return the decoded user data else returns false
             $data = AUTHORIZATION::validateToken($token);
