@@ -76,10 +76,10 @@ class Inputapi extends REST_Controller {
     }
 
     function auth_post() {
-        //if(!empty($this->_verify())) {
+        if(!empty($this->_verify())) {
             $details = $this->user->login_api($this);
             $this->response($details, 200);
-        //}
+        }
     }
 
     function up_get() {
@@ -106,6 +106,7 @@ class Inputapi extends REST_Controller {
 
     function nilai_up_get() {
         $mhs = $this->get('nim');
+        $ada_nilai = true;
 
         $kontak = $this->acd->lihat_nilai("proposal", $mhs);
 
@@ -114,6 +115,15 @@ class Inputapi extends REST_Controller {
 
             $item->penguji = $status;
         }
+
+        if($kontak[0]->penguji[0]->nilai == null || $kontak[0]->penguji[1]->nilai == null) {
+            $ada_nilai = false;
+        }
+
+        $kontak[0]->nilai = $ada_nilai ? (.5*$kontak[0]->penguji[0]->nilai) + (.5*$kontak[0]->penguji[1]->nilai) : null;
+
+        $kontak[0]->mutu        =  $ada_nilai ? $this->acd->_mutu($kontak[0]->nilai) : null;
+        $kontak[0]->color       = $ada_nilai ? $this->acd->warna($kontak[0]->nilai) : null;
 
         $this->response($kontak[0], 200);
     }
@@ -154,22 +164,25 @@ class Inputapi extends REST_Controller {
         $this->response(["result" => $f], 200);
     }
 
+    //
+
     public function input_nilai_post() {
         $id     = $this->post("id_status");
         $nilai  = $this->post("nilai");
 
-        if(!is_numeric($nilai)) {
-            $this->response(["error" => "The value you entered is not a number."], 400);
-        } else {
-            if($nilai > 0 && $nilai <= 100) {
-
-                if($this->acd->func_input_nilai($id, $nilai)) {
-                    $this->response(["info" => "ok"], 200);
-                } else {
-                    $this->response(["error" => "Error when inputting!"], 400);
-                }
+        if(!empty($this->_verify())) {
+            if(!is_numeric($nilai)) {
+                $this->response(["error" => "The value you entered ($nilai) is not a number."], 400);
             } else {
-                $this->response(["error" => "Please enter 0-100. Value you entered is: $nilai"], 400);
+                if($nilai > 0 && $nilai <= 100) {
+                    if($this->acd->func_input_nilai($id, $nilai)) {
+                        $this->response(["info" => "ok"], 200);
+                    } else {
+                        $this->response(["error" => "Error when inputting!"], 400);
+                    }
+                } else {
+                    $this->response(["error" => "Please enter 0-100. Value you entered is: $nilai"], 400);
+                }
             }
         }
     }

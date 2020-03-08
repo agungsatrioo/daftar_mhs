@@ -3,7 +3,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class M_akademik extends CI_Model {
 
-    private function _mutu($n) {
+    public function _mutu($n) {
         if($n > 78 && $n <=100) {
             return "A";
         } elseif($n > 67 && $n >= 78) {
@@ -81,6 +81,8 @@ class M_akademik extends CI_Model {
         foreach($query as $it) {
             $str = strftime("%d %B %Y", strtotime($it->sidang_date_fmtd));
             $it->sidang_date_fmtd = $str;
+
+            $it->keterangan_sidang = $it->nilai != null ?  "Sidang sudah dinilai" : "Belum sidang";
         }
 
 
@@ -158,6 +160,10 @@ class M_akademik extends CI_Model {
 
         $query = $this->m_query->select($builder);
 
+        foreach($query as $item) {
+            $item->color = $this->acd->warna($item->nilai);
+        }
+
         return $query;
     }
 
@@ -181,6 +187,10 @@ class M_akademik extends CI_Model {
         ];
 
         $query = $this->m_query->select($builder);
+
+        foreach($query as $item) {
+            $item->color = $this->acd->warna($item->nilai);
+        }
 
         return $query;
     }
