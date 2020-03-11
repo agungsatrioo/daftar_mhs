@@ -100,7 +100,7 @@ class M_user extends CI_Model {
                         )
                     );
 
-        if($user_db == null) return ["status"=>"failed","code"=>401,"msg"=>"Identity not found."];
+        if($user_db == null) return ["status"=>"failed","code"=>401,"msg"=>"Pengguna tidak ditemukan."];
 
         $u_details = $user_db[0];
 
@@ -134,7 +134,7 @@ class M_user extends CI_Model {
             //array_merge($newdata,$user_data)
             return ["status"=>"ok","code"=>200,"data"=>array_merge($newdata,$user_data)];
         } else {
-            return ["status"=>"failed","code"=>401,"msg"=>"Password are incorrect."];
+            return ["status"=>"failed","code"=>401,"msg"=>"Kata sandi salah."];
         }
     }
 

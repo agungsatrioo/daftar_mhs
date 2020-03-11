@@ -111,7 +111,6 @@ class Inputapi extends REST_Controller {
 
         foreach($kontak as $key=>$item) {
             $status = $this->acd->get_status_dosen($item->nim, "Penguji Sidang Proposal %");
-
             $item->penguji = $status;
         }
 
@@ -163,8 +162,6 @@ class Inputapi extends REST_Controller {
         $this->response(["result" => $f], 200);
     }
 
-    //
-
     public function input_nilai_post() {
         $id     = $this->post("id_status");
         $nilai  = $this->post("nilai");
@@ -174,10 +171,15 @@ class Inputapi extends REST_Controller {
                 $this->response(["error" => "The value you entered ($nilai) is not a number."], 400);
             } else {
                 if($nilai > 0 && $nilai <= 100) {
-                    if($this->acd->func_input_nilai($id, $nilai)) {
-                        $this->response(["info" => "ok"], 200);
-                    } else {
-                        $this->response(["error" => "Error when inputting!"], 400);
+                    $result = $this->acd->func_input_nilai($id, $nilai);
+
+                    switch($result) {
+                        case "ok":
+                            $this->response(["info" => "ok"], 200);
+                            break;
+                        default:
+                            $this->response(["code" => $result,
+                                            "error" => $this->acd->explain_error($result)], 400);
                     }
                 } else {
                     $this->response(["error" => "Please enter 0-100. Value you entered is: $nilai"], 400);
@@ -186,4 +188,29 @@ class Inputapi extends REST_Controller {
         }
     }
 
+    public function input_nilai_put() {
+        $id     = $this->put("id_status");
+        $nilai  = $this->put("nilai");
+
+        if(!empty($this->_verify())) {
+            if(!is_numeric($nilai)) {
+                $this->response(["error" => "The value you entered ($nilai) is not a number."], 400);
+            } else {
+                if($nilai > 0 && $nilai <= 100) {
+                    $result = $this->acd->func_edit_nilai($id, $nilai);
+
+                    switch($result) {
+                        case "ok":
+                            $this->response(["info" => "ok"], 200);
+                            break;
+                        default:
+                            $this->response(["code" => $result,
+                                            "error" => $this->acd->explain_error($result)], 400);
+                    }
+                } else {
+                    $this->response(["error" => "Please enter 0-100. Value you entered is: $nilai"], 400);
+                }
+            }
+        }
+    }
 }

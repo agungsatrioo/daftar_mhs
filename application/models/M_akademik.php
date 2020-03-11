@@ -35,6 +35,14 @@ class M_akademik extends CI_Model {
         }
     }
 
+    public function explain_error($code) {
+        switch($code) {
+            case 1062: return "Data yang Anda masukkan sudah ada sebelumnya.";
+            case 1053: return "Server sedang dimatikan.";
+            default: return "Kesalahan yang tidak diketahui. Silakan hubungi administrator.";
+        }
+    }
+
     public function upemqsh($table, $nik = 0, $nim = 0) {
         setlocale(LC_ALL, 'id_id');
 
@@ -197,7 +205,7 @@ class M_akademik extends CI_Model {
 
     public function func_input_nilai($status, $nilai) {
         if($this->cek_id_status($status)) {
-            $this->m_query->insert(
+            $a = $this->m_query->insert(
                 "t_nilai",
                 [
                     "id_status" => $status,
@@ -206,7 +214,34 @@ class M_akademik extends CI_Model {
                 ],
                 false
             );
-            return true;
-        } else return false;
+
+            if(key_exists("id", $a)) {
+                return "ok";
+            } else {
+                return $a['code'];
+            }
+        } else return "400";
+    }
+
+    public function func_edit_nilai($status, $nilai) {
+        if($this->cek_id_status($status)) {
+            $a = $this->m_query->update(
+                "t_nilai",
+                [
+                    "id_status" => $status,
+                ],
+                [
+                    "nilai"     => $nilai,
+                    "mutu"      => $this->_mutu($nilai)
+                ],
+                false
+            );
+
+            if(!is_array($a)) {
+                return "ok";
+            } else {
+                return $a['code'];
+            }
+        } else return "400";
     }
 }

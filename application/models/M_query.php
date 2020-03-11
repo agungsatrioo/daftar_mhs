@@ -220,7 +220,7 @@ class M_query extends CI_Model {
 		return $query;
 	}
 	
-	public function update( $tablename = '', $conditions = array(), $details = array(), $check_query = true ){
+	public function update( $tablename = '', $conditions = array(), $details = array(), $check_query = false ){
 		$res = array();
 		
 		try{
@@ -264,6 +264,7 @@ class M_query extends CI_Model {
 	private function get_error(){
 		if( CI_VERSION < 3 ){
 			return array(
+                'error' => true,
 				'code' => $this->dbase->_error_number(),
 				'message' => $this->dbase->_error_message()
 			);				
