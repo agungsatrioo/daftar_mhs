@@ -178,7 +178,7 @@ class M_query extends CI_Model {
     public function insert( 
 		$tablename = '', 
 		$details = array(), 
-		$return_id = FALSE, 
+		$return_id = TRUE,
 		$check_query = FALSE
 	){			
 		$result = array();

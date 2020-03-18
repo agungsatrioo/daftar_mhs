@@ -27,15 +27,18 @@ class Inputapi extends REST_Controller {
 
     private function _verify() {
         // Get all the headers
-        $headers = $this->input->request_headers();
+        $hdr_raw = $this->input->request_headers();
+        $headers = array_change_key_case($hdr_raw, CASE_LOWER);
+
         // Use try-catch
         // JWT library throws exception if the token is not valid
         try {
             // Extract the token
-            $token = $headers['Authorization'];
+            $token = $headers['authorization'];
             // Validate the token
             // Successfull validation will return the decoded user data else returns false
             $data = AUTHORIZATION::validateToken($token);
+
             if ($data === false) {
                 $status = parent::HTTP_UNAUTHORIZED;
                 $response = ['status' => "failed", "code"=>$status, 'msg' => 'Unauthorized Access!'];
@@ -68,7 +71,7 @@ class Inputapi extends REST_Controller {
     }
 
     function dosen_get() {
-        $id = $this->get('nik');
+        $id = $this->get('id_dosen');
 
         $kontak = $this->mhs->get_dosen($id);
         $this->response($kontak, 200);
@@ -88,8 +91,17 @@ class Inputapi extends REST_Controller {
         $kontak = $this->acd->upemqsh("proposal",$id, $mhs);
 
         foreach($kontak as $key=>$item) {
-            $status = $this->acd->get_status_dosen($item->nim, "Penguji Sidang Proposal %");
-            $item->penguji = $status;
+            $ada_nilai = true;
+            $penguji        = $this->acd->get_status_dosen($item->nim, "Penguji Sidang Proposal %");
+            $item->penguji  = $penguji;
+
+            unset($item->nilai);
+
+            $ada_nilai = $this->acd->cek_nilai($item->id_status);
+
+            if(empty($ada_nilai)) $ada_nilai = [["nilai" => "Belum ada", "mutu" => "Belum ada", "color" => "#000000"]];
+
+            $item->nilai = $ada_nilai;
         }
 
         $this->response($kontak, 200);
@@ -97,8 +109,24 @@ class Inputapi extends REST_Controller {
 
     function munaqosah_get() {
         $id = $this->get('dosen');
+        $mhs = $this->get('mahasiswa');
 
-        $kontak = $this->acd->upemqsh("munaqosah",$id);
+        $kontak = $this->acd->upemqsh("munaqosah", $id, $mhs);
+
+        foreach($kontak as $key=>$item) {
+            $penguji        = $this->acd->get_status_dosen($item->nim, "Penguji Sidang Munaqosah %");
+            $pembimbing     = $this->acd->get_status_dosen($item->nim, "Pembimbing Munaqosah %");
+            $item->penguji  = $penguji;
+            $item->pembimbing  = $pembimbing;
+
+            unset($item->nilai);
+
+            $ada_nilai = $this->acd->cek_nilai($item->id_status);
+
+            if(empty($ada_nilai)) $ada_nilai = [["nilai" => "Belum ada", "mutu" => "Belum ada", "color" => "#000000"]];
+
+            $item->nilai = $ada_nilai;
+        }
 
         $this->response($kontak, 200);
     }
@@ -118,10 +146,42 @@ class Inputapi extends REST_Controller {
             $ada_nilai = false;
         }
 
-        $kontak[0]->nilai = $ada_nilai ? (.5*$kontak[0]->penguji[0]->nilai) + (.5*$kontak[0]->penguji[1]->nilai) : null;
+        $nilaiku = new stdClass();
 
-        $kontak[0]->mutu        =  $ada_nilai ? $this->acd->_mutu($kontak[0]->nilai) : null;
-        $kontak[0]->color       = $ada_nilai ? $this->acd->warna($kontak[0]->nilai) : null;
+        $nilaiku->nilai =  $ada_nilai ? (.5*$kontak[0]->penguji[0]->nilai) + (.5*$kontak[0]->penguji[1]->nilai) : "Belum ada";
+        $nilaiku->mutu  =  $ada_nilai ? $this->acd->_mutu($nilaiku->nilai) : "Belum ada";
+        $nilaiku->color =  $ada_nilai ? $this->acd->warna($nilaiku->nilai) : "#000";
+
+        $kontak[0]->nilai[0] = $nilaiku;
+
+        $this->response($kontak[0], 200);
+    }
+
+    function nilai_munaqosah_get() {
+        $mhs = $this->get('nim');
+        $ada_nilai = true;
+
+        $kontak = $this->acd->lihat_nilai("munaqosah", $mhs);
+
+        foreach($kontak as $key=>$item) {
+            $penguji = $this->acd->get_status_dosen($item->nim, "Penguji Sidang Munaqosah %");
+            $pembimbing = $this->acd->get_status_dosen($item->nim, "Pembimbing Munaqosah %");
+            $item->penguji = $penguji;
+            $item->pembimbing = $pembimbing;
+        }
+
+        if($kontak[0]->pembimbing[0]->nilai == null || $kontak[0]->penguji[1]->nilai == null
+          || $kontak[0]->penguji[0]->nilai == null || $kontak[0]->pembimbing[1]->nilai == null) {
+            $ada_nilai = false;
+        }
+
+        $nilaiku = new stdClass();
+
+        $nilaiku->nilai =  $ada_nilai ? (.3*$kontak[0]->penguji[0]->nilai) + (.3*$kontak[0]->penguji[1]->nilai) +  (.2*$kontak[0]->pembimbing[0]->nilai) + (.2*$kontak[0]->pembimbing[1]->nilai) : "Belum ada";
+        $nilaiku->mutu  =  $ada_nilai ? $this->acd->_mutu($nilaiku->nilai) : "Belum ada";
+        $nilaiku->color =  $ada_nilai ? $this->acd->warna($nilaiku->nilai) : "#000";
+
+        $kontak[0]->nilai[0] = $nilaiku;
 
         $this->response($kontak[0], 200);
     }

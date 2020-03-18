@@ -205,8 +205,8 @@ GROUP by id_jenis_status
             $a = 641;
             $b = 768;
 
-                $oa = [[641,768],[769,896],[897,1024]];
-                $arr = [];
+            $oa = [[641,768],[769,896],[897,1024]];
+            $arr = [];
 
             for($i=$a; $i<=$b; $i++) {
                 $m = rand(1, 12);
@@ -223,20 +223,88 @@ GROUP by id_jenis_status
             }
     }
 
+    public function mya() {
+        /*
+        1 	1 	    128 //Pembimbing akademik
+
+        3 	129 	256 //mq1p 1
+        4 	257 	384 //mq2p
+
+        6 	385 	512 //up1 10
+        7 	513 	640 //up2 1
+
+        8 	641 	768 //kmpre1 20
+        9 	769 	896 //kompre2
+        10 	897 	1024 //kompre3
+
+        11 	1025 	1152 //mq1u 1
+        12 	1153 	1280 //mq2u
+        */
+
+        $ganti = 3;
+        $mula = 0;
+        $awal = 1;
+        echo "INSERT INTO t_status_sidang VALUES<BR>";
+
+        for($i=1153; $i<=1280; $i++) {
+            if($mula % $ganti == 0) {
+                $mula = 0;
+                $awal++;
+            }
+            echo "($i, $awal),<br>";
+            $mula++;
+        }
+    }
+
     public function t_st_sidang() {
         echo "INSERT INTO t_u_munaqosah VALUES<BR>";
     }
+
 
     public function myz() {
         echo "INSERT INTO t_u_munaqosah VALUES<BR>";
 
         $j=0;
 
-        for($i=259; $i<=386; $i++) {
+        for($i=129; $i<=256; $i++) {
             $j++;
             echo "(NULL, $i, 'Munaqosah $j'),<br>";
         }
+         $j=0;
 
+        for($i=257; $i<=384; $i++) {
+            $j++;
+            echo "(NULL, $i, 'Munaqosah $j'),<br>";
+        }
+         $j=0;
+
+        for($i=1025; $i<=1152; $i++) {
+            $j++;
+            echo "(NULL, $i, 'Munaqosah $j'),<br>";
+        }
+         $j=0;
+
+        for($i=1153; $i<=1280; $i++) {
+            $j++;
+            echo "(NULL, $i, 'Munaqosah $j'),<br>";
+        }
+    }
+
+    public function myc() {
+        echo "INSERT INTO t_u_proposal VALUES<BR>";
+        $j=0;
+
+        for($i=385; $i<=512; $i++) {
+            $j++;
+            echo "(NULL, $i, 'Proposal $j'),<br>";
+        }
+
+        $j =0;
+
+        for($i=513; $i<=640; $i++) {
+            $j++;
+            echo "(NULL, $i, 'Proposal $j'),<br>";
+        }
     }
 
     public function myq() {
@@ -268,15 +336,25 @@ GROUP by id_jenis_status
         $utype = [1, 3, 4, 6, 7, 8, 9, 10, 11, 12];
         $q = 0;
 
+        $limit = 3;
+
         foreach ($utype as $type) {
-            $mhs = $this->mhs->mhsku();
-            $dsn = $this->mhs->get_dosen();
+            $mhs = $this->mhs->get_mhs(0);
+            $dsn = $this->mhs->get_dosen(0,55201);
 
             foreach($mhs as $it) {
-                if($j%3==0) {
-                    $r = array_rand($dsn);
-                    $q = $dsn[$r];
+                if($type == 6 || $utype ==7) {
+                    if($j%$limit==0) {
+                        $r = array_rand($dsn);
+                        $q = $dsn[$r];
+                    }
+                } else {
+                    if($j%$limit==0) {
+                        $r = array_rand($dsn);
+                        $q = $dsn[$r];
+                    }
                 }
+
                 $j++;
                 echo "(NULL, $type, {$it->user_identity}, {$q->user_identity}),<br>";
                 unset($dsn[$r]);
@@ -321,6 +399,19 @@ GROUP by id_jenis_status
 
     public function bimbingan() {
 
+    }
+
+    public function generate_login() {
+                $builder = [
+            "table"     => "t_dosen",
+            "fields"    => "id_dosen",
+        ];
+
+        $query = $this->m_query->select($builder);
+
+        foreach($query as $item) {
+            echo "({$item->id_dosen}, '".password_hash("dosen", PASSWORD_DEFAULT) . "',0,NULL,0,5,0), <BR>";
+        }
     }
 
 }

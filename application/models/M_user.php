@@ -86,23 +86,40 @@ class M_user extends CI_Model {
         $this->session->sess_destroy();
     }
 
-    public function login_api($input) {
+    private function get_user($id) {
+         return $this->m_query->select(['table' => 't_pengguna','conditions' => ['identity' => $id]]);
+    }
+
+    private function cek_user_mhs($nim) {
+         return $this->m_query->select(['table' => 't_mahasiswa','conditions' => ['nim' => $nim]]);
+    }
+
+    private function cek_user_dosen($identity) {
+         return $this->m_query->select(['table' => 't_dosen',
+                                        'conditions' => ['or' => ["id_dosen"=>$identity,"nik"=>$identity, "nidn"=>$identity, "nip"=>$identity]]
+                                       ]);
+    }
+
+    public function userlog($input) {
         $identity   = $input->post('identity');
         $password   = $input->post('password');
         $uniqueid   = $this->security->get_csrf_hash();
 
-        $user_db  = $this->m_query->select(
-                        array(
-                            'table' => 't_pengguna',
-                            'conditions' => array(
-                                'identity' => $identity,
-                            )
-                        )
-                    );
+        $cek_mhs    = $this->cek_user_mhs($identity);
+        $cek_dosen  = $this->cek_user_dosen($identity);
 
-        if($user_db == null) return ["status"=>"failed","code"=>401,"msg"=>"Pengguna tidak ditemukan."];
+        //cek mahasiswa dulu
+        if($cek_mhs != null) {
+            $identity = $cek_mhs[0]->nim;
+        } elseif($cek_dosen != null) { //baru cek dosen
+            $identity = $cek_dosen[0]->id_dosen;
+        } else {
+            return ["status"=>"failed","code"=>401,"msg"=>"Pengguna tidak ditemukan."];
+        }
 
-        $u_details = $user_db[0];
+        $user = $this->get_user($identity);
+
+        $u_details = $user[0];
 
         if(password_verify($password,$u_details->password)) {
             $u_level    = $this->get_usergroup($u_details->level);
@@ -136,6 +153,11 @@ class M_user extends CI_Model {
         } else {
             return ["status"=>"failed","code"=>401,"msg"=>"Kata sandi salah."];
         }
+
+    }
+
+    public function login_api($input) {
+        return $this->userlog($input);
     }
 
 

@@ -43,15 +43,16 @@ class M_akademik extends CI_Model {
         }
     }
 
-    public function upemqsh($table, $nik = 0, $nim = 0) {
+    public function upemqsh($table, $id_dosen = 0, $nim = 0) {
         setlocale(LC_ALL, 'id_id');
 
-        $arr = ["s_sidang.id_status","mhs.nim","nama_mhs","dsn.nik","CONCAT(dsn.nama_dosen,', ', dsn.gelar) as nama_dosen", "judul_$table", "tgl_jadwal_sidang as sidang_date_fmtd", "tgl_jadwal_sidang as sidang_date", "ruangan.kode_ruang", "nama_kelompok_sidang", "nilai"];
+        $arr = ["s_sidang.id_status","mhs.nim","nama_mhs", "judul_$table", "tgl_jadwal_sidang as sidang_date_fmtd", "tgl_jadwal_sidang as sidang_date", "ruangan.kode_ruang", "nama_kelompok_sidang", "nilai"];
 
         $builder = [
                         "table" => "t_u_$table",
-                        "conditions" => ($nik>0 ? ["dsn.nik" => $nik] : []) + ($nim>0 ? ["mhs.nim" => $nim] : []),
+                        "conditions" => ($id_dosen>0 ? ["dsn.id_dosen" => $id_dosen] : []) + ($nim>0 ? ["mhs.nim" => $nim] : []),
                         "fields" => $arr,
+                        "order" => "sidang_date",
                         "joins" => [
                             "t_status_sidang s_sidang" => [
                                 "on" => ["s_sidang.id_status" => "t_u_$table.id_status_sidang"]
@@ -66,7 +67,7 @@ class M_akademik extends CI_Model {
                                 "on" => ["status.nim" => "mhs.nim"]
                             ],
                             "t_dosen dsn" => [
-                                "on" => ["status.nik" => "dsn.nik"]
+                                "on" => ["status.id_dosen" => "dsn.id_dosen"]
                             ],
                             "t_kelompok_sidang kelompok" => [
                                 "on" => ["sidang.id_kelompok_sidang" => "kelompok.id_kelompok_sidang"]
@@ -86,6 +87,7 @@ class M_akademik extends CI_Model {
 
         $query = $this->m_query->select($builder);
 
+
         foreach($query as $it) {
             $str = strftime("%d %B %Y", strtotime($it->sidang_date_fmtd));
             $it->sidang_date_fmtd = $str;
@@ -100,7 +102,7 @@ class M_akademik extends CI_Model {
     public function lihat_nilai($table, $nim) {
         setlocale(LC_ALL, 'id_id');
 
-        $arr = ["s_sidang.id_status","mhs.nim","nama_mhs","dsn.nik","CONCAT(dsn.nama_dosen,', ', dsn.gelar) as nama_dosen", "judul_$table", "tgl_jadwal_sidang as sidang_date_fmtd", "tgl_jadwal_sidang as sidang_date", "ruangan.kode_ruang", "nama_kelompok_sidang"];
+        $arr = ["s_sidang.id_status","mhs.nim","nama_mhs","dsn.id_dosen","CONCAT(dsn.nama_dosen, '', IFNULL(dsn.gelar_depan, '')) as nama_dosen", "judul_$table", "tgl_jadwal_sidang as sidang_date_fmtd", "tgl_jadwal_sidang as sidang_date", "ruangan.kode_ruang", "nama_kelompok_sidang"];
 
         $builder = [
                         "table" => "t_u_$table",
@@ -121,7 +123,7 @@ class M_akademik extends CI_Model {
                                 "on" => ["status.nim" => "mhs.nim"]
                             ],
                             "t_dosen dsn" => [
-                                "on" => ["status.nik" => "dsn.nik"]
+                                "on" => ["status.id_dosen" => "dsn.id_dosen"]
                             ],
                             "t_kelompok_sidang kelompok" => [
                                 "on" => ["sidang.id_kelompok_sidang" => "kelompok.id_kelompok_sidang"]
@@ -178,13 +180,13 @@ class M_akademik extends CI_Model {
     public function get_status_dosen($nim, $jenis_status) {
         $builder = [
             "table"     => "t_status",
-            "fields"    => "t_status.nik, CONCAT(nama_dosen,', ', gelar) as nama_dosen, nama_status, nilai, mutu",
+            "fields"    => "t_status.id_dosen, CONCAT(t_dosen.nama_dosen, '', IFNULL(t_dosen.gelar_depan, '')) as nama_dosen, nama_status, nilai, mutu",
             "joins"     => [
                 "t_jenis_status" => [
                     "on" => ["t_jenis_status.id_jenis_status"=>"t_status.id_jenis_status"]
                 ],
                 "t_dosen" => [
-                    "on" => ["t_dosen.nik"=>"t_status.nik"]
+                    "on" => ["t_dosen.id_dosen"=>"t_status.id_dosen"]
                 ],
                 "t_nilai" => [
                     "on" => ["t_nilai.id_status"=>"t_status.id_status"],
@@ -212,7 +214,7 @@ class M_akademik extends CI_Model {
                     "nilai"     => $nilai,
                     "mutu"      => $this->_mutu($nilai)
                 ],
-                false
+                TRUE
             );
 
             if(key_exists("id", $a)) {
