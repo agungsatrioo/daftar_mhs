@@ -134,8 +134,8 @@ class M_user extends CI_Model {
 
             switch($u_level->id) {
                 case 5:
-                    $this->load->model(["M_mhs"=>"mhs"]);
-                    $query = $this->mhs->get_dosen($identity);
+                    $this->load->model(["M_dosen"=>"dosen"]);
+                    $query = $this->dosen->get_dosen($identity);
                     $user_data = get_object_vars($query[0]);
 
                     break;

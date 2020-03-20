@@ -307,6 +307,30 @@ GROUP by id_jenis_status
         }
     }
 
+    public function myd() {
+        echo "INSERT INTO t_u_kompre VALUES<BR>";
+        $j=0;
+
+        for($i=641; $i<=768; $i++) {
+            $j++;
+            echo "(NULL, $i),<br>";
+        }
+
+        $j =0;
+
+        for($i=769; $i<=896; $i++) {
+            $j++;
+            echo "(NULL, $i),<br>";
+        }
+
+        $j =0;
+
+        for($i=897; $i<=1024; $i++) {
+            $j++;
+            echo "(NULL, $i),<br>";
+        }
+    }
+
     public function myq() {
 
         /*
