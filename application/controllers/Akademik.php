@@ -8,6 +8,8 @@ class Akademik extends MY_Controller {
         
         $this->load->model(["M_mhs"=>"mhs"]);
         $this->load->library('table');
+
+        die("This page is locked!");
     }
     
     private function alterable() {
