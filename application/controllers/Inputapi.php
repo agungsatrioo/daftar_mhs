@@ -116,7 +116,7 @@ class Inputapi extends REST_Controller {
 
                 break;
             } else {
-                $item->nilai = $this->acd->cek_nilai($item->id_status);
+                $item->nilai = $this->acd->cek_nilai($item->id_status)[0];
             }
 
         }
@@ -160,7 +160,7 @@ class Inputapi extends REST_Controller {
 
                 break;
             } else {
-                $item->nilai = $this->acd->cek_nilai($item->id_status);
+                $item->nilai = $this->acd->cek_nilai($item->id_status)[0];
             }
         }
 
@@ -201,7 +201,7 @@ class Inputapi extends REST_Controller {
 
                 break;
             } else {
-                $item->nilai = $this->acd->cek_nilai($item->id_status);
+                $item->nilai = $this->acd->cek_nilai($item->id_status)[0];
             }
         }
 
