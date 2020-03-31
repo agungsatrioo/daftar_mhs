@@ -93,19 +93,35 @@ class Inputapi extends REST_Controller {
 
         foreach($kontak as $key=>$item) {
             $ada_nilai = true;
-            $penguji        = $this->acd->get_status_dosen($item->nim, "Penguji Sidang Proposal %");
-            $item->penguji  = $penguji;
 
-            unset($item->nilai);
+            if(isset($mhs)) {
+                $penguji        = $this->acd->get_status_dosen($item->nim, "Penguji Sidang Proposal %");
+                $item->penguji  = $penguji;
 
-            $ada_nilai = $this->acd->cek_nilai($item->id_status);
+                unset($item->id_status);
+                unset($item->keterangan_sidang);
 
-            if(empty($ada_nilai)) $ada_nilai = [["nilai" => "Belum ada", "mutu" => "Belum ada", "color" => "#000000"]];
+                foreach($item->penguji as $k1=>$v1) {
+                    if(!is_numeric($v1->nilai)) {
+                        $item->nilai = ["nilai"=>$v1->nilai,"mutu"=>$v1->mutu,"color"=>$v1->color];
+                        $ada_nilai   = false;
+                        break;
+                    }
+                }
 
-            $item->nilai = $ada_nilai;
+                if($ada_nilai) {
+                    $nilai = (.5*$kontak[0]->penguji[0]->nilai) + (.5*$kontak[0]->penguji[1]->nilai);
+                    $item->nilai = ["nilai"=>floor($nilai), "mutu"=>$this->acd->_mutu($nilai), "color"=>$this->acd->warna($nilai)];
+                }
+
+                break;
+            } else {
+                $item->nilai = $this->acd->cek_nilai($item->id_status);
+            }
+
         }
 
-        $this->response($kontak, 200);
+        $this->response(isset($mhs) ? $kontak[0] : $kontak, 200);
     }
 
     function munaqosah_get() {
@@ -115,43 +131,81 @@ class Inputapi extends REST_Controller {
         $kontak = $this->acd->upemqsh("munaqosah", $id, $mhs);
 
         foreach($kontak as $key=>$item) {
-            $penguji        = $this->acd->get_status_dosen($item->nim, "Penguji Sidang Munaqosah %");
-            $pembimbing     = $this->acd->get_status_dosen($item->nim, "Pembimbing Munaqosah %");
-            $item->penguji  = $penguji;
-            $item->pembimbing  = $pembimbing;
+            $ada_nilai = true;
 
-            unset($item->nilai);
+            if(isset($mhs)) {
+                $penguji        = $this->acd->get_status_dosen($item->nim, "Penguji Sidang Munaqosah %");
+                $pembimbing     = $this->acd->get_status_dosen($item->nim, "Pembimbing Munaqosah %");
+                $dosenku        = $this->acd->get_status_dosen($item->nim, "% Munaqosah %");
 
-            $ada_nilai = $this->acd->cek_nilai($item->id_status);
+                $item->penguji  = $penguji;
+                $item->pembimbing  = $pembimbing;
 
-            if(empty($ada_nilai)) $ada_nilai = [["nilai" => "Belum ada", "mutu" => "Belum ada", "color" => "#000000"]];
+                unset($item->id_status);
+                unset($item->keterangan_sidang);
 
-            $item->nilai = $ada_nilai;
+                foreach($dosenku as $k1=>$v1) {
+                    if(!is_numeric($v1->nilai)) {
+                        $item->nilai = ["nilai"=>$v1->nilai,"mutu"=>$v1->mutu,"color"=>$v1->color];
+                        $ada_nilai   = false;
+                        break;
+                    }
+                }
+
+                if($ada_nilai) {
+                    $nilai = (.3*$kontak[0]->penguji[0]->nilai) + (.3*$kontak[0]->penguji[1]->nilai) +  (.2*$kontak[0]->pembimbing[0]->nilai) + (.2*$kontak[0]->pembimbing[1]->nilai);
+
+                    $item->nilai = ["nilai"=>floor($nilai), "mutu"=>$this->acd->_mutu($nilai), "color"=>$this->acd->warna($nilai)];
+                }
+
+                break;
+            } else {
+                $item->nilai = $this->acd->cek_nilai($item->id_status);
+            }
         }
 
-        $this->response($kontak, 200);
+        $this->response(isset($mhs) ? $kontak[0] : $kontak, 200);
     }
 
     function kompre_get() {
         $id = $this->get('dosen');
         $mhs = $this->get('mahasiswa');
-
+        $presentase_kompre = .333333333; //must be precise!
         $kontak = $this->acd->get_kompre($id, $mhs);
 
         foreach($kontak as $key=>$item) {
-            $penguji        = $this->acd->get_status_dosen($item->nim, "Penguji Sidang Komprehensif %");
-            $item->penguji  = $penguji;
+            $ada_nilai = true;
 
-            unset($item->nilai);
+            if(isset($mhs)) {
+                $penguji        = $this->acd->get_status_dosen($item->nim, "Penguji Sidang Komprehensif %");
+                $item->penguji  = $penguji;
 
-            $ada_nilai = $this->acd->cek_nilai($item->id_status);
+                unset($item->id_status);
+                unset($item->keterangan_sidang);
 
-            if(empty($ada_nilai)) $ada_nilai = [["nilai" => "Belum ada", "mutu" => "Belum ada", "color" => "#000000"]];
+                foreach($item->penguji as $k1=>$v1) {
+                    if(!is_numeric($v1->nilai)) {
+                        $item->nilai = ["nilai"=>$v1->nilai,"mutu"=>$v1->mutu,"color"=>$v1->color];
+                        $ada_nilai   = false;
+                        break;
+                    }
+                }
 
-            $item->nilai = $ada_nilai;
+                if($ada_nilai) {
+                    $nilai = ($presentase_kompre*$kontak[0]->penguji[0]->nilai) + ($presentase_kompre*$kontak[0]->penguji[1]->nilai) +($presentase_kompre*$kontak[0]->penguji[2]->nilai);
+
+                    if($nilai > 100) $nilai = 100;
+
+                    $item->nilai = ["nilai"=>floor($nilai), "mutu"=>$this->acd->_mutu($nilai), "color"=>$this->acd->warna($nilai)];
+                }
+
+                break;
+            } else {
+                $item->nilai = $this->acd->cek_nilai($item->id_status);
+            }
         }
 
-        $this->response($kontak, 200);
+        $this->response(isset($mhs) ? $kontak[0] : $kontak, 200);
     }
 
     function nilai_up_get() {
@@ -249,7 +303,6 @@ class Inputapi extends REST_Controller {
         if(empty($kontak)) $kontak = [["nilai" => "Belum ada", "mutu" => "Belum ada", "color" => "#000000"]];
 
         $this->response($kontak, 200);
-
     }
 
     public function hello_get() {

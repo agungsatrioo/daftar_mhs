@@ -268,9 +268,21 @@ class M_akademik extends CI_Model {
 
     public function cek_nilai($id) {
         $builder = [
-            "table"     => "t_nilai",
-            "fields"    => "nilai, mutu",
-            "conditions"=> ["id_status" => $id]
+            "table"     => "t_status",
+            "fields"    => "t_status.id_status, t_status.id_dosen, CONCAT(t_dosen.nama_dosen, '', IFNULL(t_dosen.gelar_depan, '')) as nama_dosen, nama_status, IFNULL(nilai, 'Belum ada') as nilai, IFNULL(mutu, 'Belum ada') as mutu",
+            "joins"     => [
+                "t_jenis_status" => [
+                    "on" => ["t_jenis_status.id_jenis_status"=>"t_status.id_jenis_status"]
+                ],
+                "t_dosen" => [
+                    "on" => ["t_dosen.id_dosen"=>"t_status.id_dosen"]
+                ],
+                "t_nilai" => [
+                    "on" => ["t_nilai.id_status"=>"t_status.id_status"],
+                    "type" => "left"
+                ],
+            ],
+            "conditions"=>  ["t_status.id_status" => $id]
         ];
 
         $query = $this->m_query->select($builder);
@@ -285,7 +297,7 @@ class M_akademik extends CI_Model {
     public function get_status_dosen($nim, $jenis_status) {
         $builder = [
             "table"     => "t_status",
-            "fields"    => "t_status.id_dosen, CONCAT(t_dosen.nama_dosen, '', IFNULL(t_dosen.gelar_depan, '')) as nama_dosen, nama_status, nilai, mutu",
+            "fields"    => "t_status.id_status, t_status.id_dosen, CONCAT(t_dosen.nama_dosen, '', IFNULL(t_dosen.gelar_depan, '')) as nama_dosen, nama_status, IFNULL(nilai, 'Belum ada') as nilai, IFNULL(mutu, 'Belum ada') as mutu",
             "joins"     => [
                 "t_jenis_status" => [
                     "on" => ["t_jenis_status.id_jenis_status"=>"t_status.id_jenis_status"]
