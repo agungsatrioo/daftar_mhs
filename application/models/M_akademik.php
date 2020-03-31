@@ -31,7 +31,7 @@ class M_akademik extends CI_Model {
         } elseif($n > 0 && $n >= 41) {
             return "#F44336";
         } else {
-            return "#000";
+            return "#000000";
         }
     }
 
