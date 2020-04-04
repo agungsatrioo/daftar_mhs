@@ -50,7 +50,6 @@ class M_akademik extends CI_Model {
 
         $builder = [
                         "table" => "t_u_kompre",
-                        "conditions" => ($id_dosen>0 ? ["dsn.id_dosen" => $id_dosen] : []) + ($nim>0 ? ["mhs.nim" => $nim] : []),
                         "fields" => $arr,
                         "order" => "sidang_date",
                         "joins" => [
@@ -85,28 +84,40 @@ class M_akademik extends CI_Model {
                         ]
                     ];
 
+        if($id_dosen > 0) {
+            $builder["conditions"] = ["dsn.id_dosen" => $id_dosen];
+        } elseif($nim > 0) {
+            $builder["conditions"] = ["mhs.nim" => $nim];
+        }
+
         $query = $this->m_query->select($builder);
 
 
         foreach($query as $it) {
+            $it->keterangan_sidang = $it->nilai != null ?  "Sidang sudah dinilai" : "Belum sidang";
+            if($id_dosen > 0) {
+                $it->keterangan_sidang = $it->nilai != null ?  "Sidang sudah dinilai" : "Belum sidang";
+            } elseif($nim > 0) {
+                //unset($it->id_status);
+            }
+
             $str = strftime("%d %B %Y", strtotime($it->sidang_date_fmtd));
             $it->sidang_date_fmtd = $str;
-
-            $it->keterangan_sidang = $it->nilai != null ?  "Sidang sudah dinilai" : "Belum sidang";
         }
 
 
         return $query;
     }
 
-    public function upemqsh($table, $id_dosen = 0, $nim = 0) {
+    public function get_up_munaqosah($table, $id_dosen = 0, $nim = 0) {
         setlocale(LC_ALL, 'id_id');
+        $cond = [];
 
         $arr = ["s_sidang.id_status","mhs.nim","nama_mhs", "judul_$table", "tgl_jadwal_sidang as sidang_date_fmtd", "tgl_jadwal_sidang as sidang_date", "ruangan.kode_ruang", "nama_kelompok_sidang", "nilai"];
 
+
         $builder = [
                         "table" => "t_u_$table",
-                        "conditions" => ($id_dosen>0 ? ["dsn.id_dosen" => $id_dosen] : []) + ($nim>0 ? ["mhs.nim" => $nim] : []),
                         "fields" => $arr,
                         "order" => "sidang_date",
                         "joins" => [
@@ -141,61 +152,23 @@ class M_akademik extends CI_Model {
                         ]
                     ];
 
+        if($id_dosen > 0) {
+            $builder["conditions"] = ["dsn.id_dosen" => $id_dosen];
+        } elseif($nim > 0) {
+            $builder["conditions"] = ["mhs.nim" => $nim];
+        }
+
         $query = $this->m_query->select($builder);
 
-
         foreach($query as $it) {
-            $str = strftime("%d %B %Y", strtotime($it->sidang_date_fmtd));
-            $it->sidang_date_fmtd = $str;
-
             $it->keterangan_sidang = $it->nilai != null ?  "Sidang sudah dinilai" : "Belum sidang";
-        }
 
+            if($id_dosen > 0) {
+                $it->keterangan_sidang = $it->nilai != null ?  "Sidang sudah dinilai" : "Belum sidang";
+            } elseif($nim > 0) {
+                //unset($it->id_status);
+            }
 
-        return $query;
-    }
-
-    public function lihat_nilai($table, $nim) {
-        setlocale(LC_ALL, 'id_id');
-
-        $arr = ["s_sidang.id_status","mhs.nim","nama_mhs","dsn.id_dosen","CONCAT(dsn.nama_dosen, '', IFNULL(dsn.gelar_depan, '')) as nama_dosen", "judul_$table", "tgl_jadwal_sidang as sidang_date_fmtd", "tgl_jadwal_sidang as sidang_date", "ruangan.kode_ruang", "nama_kelompok_sidang"];
-
-        $builder = [
-                        "table" => "t_u_$table",
-                        "distinct" => true,
-                        "conditions" => ["mhs.nim" => $nim],
-                        "fields" => $arr,
-                        "joins" => [
-                            "t_status_sidang s_sidang" => [
-                                "on" => ["s_sidang.id_status" => "t_u_$table.id_status_sidang"]
-                            ],
-                            "t_status status" => [
-                                "on" => ["s_sidang.id_status" => "status.id_status"]
-                            ],
-                            "t_sidang sidang" => [
-                                "on" => ["s_sidang.id_sidang" => "sidang.id_sidang"]
-                            ],
-                            "t_mahasiswa mhs" => [
-                                "on" => ["status.nim" => "mhs.nim"]
-                            ],
-                            "t_dosen dsn" => [
-                                "on" => ["status.id_dosen" => "dsn.id_dosen"]
-                            ],
-                            "t_kelompok_sidang kelompok" => [
-                                "on" => ["sidang.id_kelompok_sidang" => "kelompok.id_kelompok_sidang"]
-                            ],
-                            "t_ruangan ruangan" => [
-                                "on" => ["sidang.id_ruangan" => "ruangan.id_ruang"]
-                            ],
-                            "t_jadwal_sidang jadwal" => [
-                                "on" => ["sidang.id_jadwal_sidang" => "jadwal.id_jadwal_sidang"]
-                            ],
-                        ]
-                    ];
-
-        $query = $this->m_query->select($builder);
-
-        foreach($query as $it) {
             $str = strftime("%d %B %Y", strtotime($it->sidang_date_fmtd));
             $it->sidang_date_fmtd = $str;
         }
@@ -204,51 +177,33 @@ class M_akademik extends CI_Model {
         return $query;
     }
 
-    public function lihat_nilai_kompre($nim) {
-        setlocale(LC_ALL, 'id_id');
-
-        $arr = ["s_sidang.id_status","mhs.nim","nama_mhs","dsn.id_dosen","CONCAT(dsn.nama_dosen, '', IFNULL(dsn.gelar_depan, '')) as nama_dosen", "tgl_jadwal_sidang as sidang_date_fmtd", "tgl_jadwal_sidang as sidang_date", "ruangan.kode_ruang", "nama_kelompok_sidang"];
-
+    public function get_revisi($conditions) {
         $builder = [
-                        "table" => "t_u_kompre",
-                        "distinct" => true,
-                        "conditions" => ["mhs.nim" => $nim],
-                        "fields" => $arr,
-                        "joins" => [
-                            "t_status_sidang s_sidang" => [
-                                "on" => ["s_sidang.id_status" => "t_u_kompre.id_status_sidang"]
-                            ],
-                            "t_status status" => [
-                                "on" => ["s_sidang.id_status" => "status.id_status"]
-                            ],
-                            "t_sidang sidang" => [
-                                "on" => ["s_sidang.id_sidang" => "sidang.id_sidang"]
-                            ],
-                            "t_mahasiswa mhs" => [
-                                "on" => ["status.nim" => "mhs.nim"]
-                            ],
-                            "t_dosen dsn" => [
-                                "on" => ["status.id_dosen" => "dsn.id_dosen"]
-                            ],
-                            "t_kelompok_sidang kelompok" => [
-                                "on" => ["sidang.id_kelompok_sidang" => "kelompok.id_kelompok_sidang"]
-                            ],
-                            "t_ruangan ruangan" => [
-                                "on" => ["sidang.id_ruangan" => "ruangan.id_ruang"]
-                            ],
-                            "t_jadwal_sidang jadwal" => [
-                                "on" => ["sidang.id_jadwal_sidang" => "jadwal.id_jadwal_sidang"]
-                            ],
-                        ]
-                    ];
+            "table"     => "t_revisi",
+            "fields"    => "id_revisi, t_mahasiswa.nim, t_dosen.id_dosen, t_mahasiswa.nama_mhs, CONCAT(t_dosen.nama_dosen, ', ', IFNULL(t_dosen.gelar_depan, '')) as nama_dosen, t_jenis_status.nama_status, t_revisi.id_status, detail_revisi, tgl_revisi_input, tgl_revisi_deadline, status as status_revisi",
+            "conditions"=> $conditions,
+            "joins"     => [
+                                "t_status" => [
+                                    "on" => ["t_revisi.id_status" => "t_status.id_status"]
+                                ],
+                                "t_dosen" => [
+                                    "on" => ["t_status.id_dosen" => "t_dosen.id_dosen"]
+                                ],
+                                "t_mahasiswa" => [
+                                    "on" => ["t_status.nim" => "t_mahasiswa.nim"]
+                                ],
+                                "t_jenis_status" => [
+                                    "on" => ["t_status.id_jenis_status" => "t_jenis_status.id_jenis_status"]
+                                ],
+
+                            ]
+        ];
 
         $query = $this->m_query->select($builder);
 
-        foreach($query as $it) {
-            $str = strftime("%d %B %Y", strtotime($it->sidang_date_fmtd));
-            $it->sidang_date_fmtd = $str;
+        foreach($query as $item) {
+            $item->status_revisi = $item->status_revisi > 0 ? true : false;
         }
-
 
         return $query;
     }
@@ -257,7 +212,8 @@ class M_akademik extends CI_Model {
         $builder = [
             "table"     => "t_status",
             "fields"    => "id_status",
-            "conditions"=> ["id_status" => $id]
+            "conditions"=> ["id_status" => $id],
+
         ];
 
         $query = $this->m_query->select($builder);
@@ -317,10 +273,12 @@ class M_akademik extends CI_Model {
 
         foreach($query as $item) {
             $item->color = $this->acd->warna($item->nilai);
+            $item->revisi = $this->acd->get_revisi(["t_status.id_status" => $item->id_status]);
         }
 
         return $query;
     }
+
 
     public function func_input_nilai($status, $nilai) {
         if($this->cek_id_status($status)) {

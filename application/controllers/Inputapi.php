@@ -89,7 +89,7 @@ class Inputapi extends REST_Controller {
         $id = $this->get('dosen');
         $mhs = $this->get('mahasiswa');
 
-        $kontak = $this->acd->upemqsh("proposal",$id, $mhs);
+        $kontak = $this->acd->get_up_munaqosah("proposal",$id, $mhs);
 
         foreach($kontak as $key=>$item) {
             $ada_nilai = true;
@@ -97,9 +97,6 @@ class Inputapi extends REST_Controller {
             if(isset($mhs)) {
                 $penguji        = $this->acd->get_status_dosen($item->nim, "Penguji Sidang Proposal %");
                 $item->penguji  = $penguji;
-
-                unset($item->id_status);
-                unset($item->keterangan_sidang);
 
                 foreach($item->penguji as $k1=>$v1) {
                     if(!is_numeric($v1->nilai)) {
@@ -118,7 +115,6 @@ class Inputapi extends REST_Controller {
             } else {
                 $item->nilai = $this->acd->cek_nilai($item->id_status)[0];
             }
-
         }
 
         $this->response(isset($mhs) ? $kontak[0] : $kontak, 200);
@@ -128,7 +124,7 @@ class Inputapi extends REST_Controller {
         $id = $this->get('dosen');
         $mhs = $this->get('mahasiswa');
 
-        $kontak = $this->acd->upemqsh("munaqosah", $id, $mhs);
+        $kontak = $this->acd->get_up_munaqosah("munaqosah", $id, $mhs);
 
         foreach($kontak as $key=>$item) {
             $ada_nilai = true;
@@ -140,9 +136,6 @@ class Inputapi extends REST_Controller {
 
                 $item->penguji  = $penguji;
                 $item->pembimbing  = $pembimbing;
-
-                unset($item->id_status);
-                unset($item->keterangan_sidang);
 
                 foreach($dosenku as $k1=>$v1) {
                     if(!is_numeric($v1->nilai)) {
@@ -171,6 +164,7 @@ class Inputapi extends REST_Controller {
         $id = $this->get('dosen');
         $mhs = $this->get('mahasiswa');
         $presentase_kompre = .333333333; //must be precise!
+
         $kontak = $this->acd->get_kompre($id, $mhs);
 
         foreach($kontak as $key=>$item) {
@@ -179,9 +173,6 @@ class Inputapi extends REST_Controller {
             if(isset($mhs)) {
                 $penguji        = $this->acd->get_status_dosen($item->nim, "Penguji Sidang Komprehensif %");
                 $item->penguji  = $penguji;
-
-                unset($item->id_status);
-                unset($item->keterangan_sidang);
 
                 foreach($item->penguji as $k1=>$v1) {
                     if(!is_numeric($v1->nilai)) {
@@ -208,101 +199,34 @@ class Inputapi extends REST_Controller {
         $this->response(isset($mhs) ? $kontak[0] : $kontak, 200);
     }
 
-    function nilai_up_get() {
-        $mhs = $this->get('nim');
-        $nilai = null;
-        $nilaiku = new stdClass();
-
-        $kontak = $this->acd->lihat_nilai("proposal", $mhs);
-
-        foreach($kontak as $key=>$item) {
-            $status = $this->acd->get_status_dosen($item->nim, "Penguji Sidang Proposal %");
-            $item->penguji = $status;
-        }
-
-        if($kontak[0]->penguji[0]->nilai == null && $kontak[0]->penguji[1]->nilai == null) {
-            $nilai = (.5*$kontak[0]->penguji[0]->nilai) + (.5*$kontak[0]->penguji[1]->nilai);
-        }
-
-        $nilaiku->nilai =  $nilai != null ? $nilai : "Belum ada";
-        $nilaiku->mutu  =  $nilai != null ? $this->acd->_mutu($nilaiku->nilai) : "Belum ada";
-        $nilaiku->color =  $nilai != null ? $this->acd->warna($nilaiku->nilai) : "#000";
-
-        $kontak[0]->nilai[0] = $nilaiku;
-
-        $this->response($kontak[0], 200);
-    }
-
-    function nilai_munaqosah_get() {
-        $mhs = $this->get('nim');
-        $nilai = null;
-        $nilaiku = new stdClass();
-
-        $kontak = $this->acd->lihat_nilai("munaqosah", $mhs);
-
-        foreach($kontak as $key=>$item) {
-            $penguji = $this->acd->get_status_dosen($item->nim, "Penguji Sidang Munaqosah %");
-            $pembimbing = $this->acd->get_status_dosen($item->nim, "Pembimbing Munaqosah %");
-
-            $item->penguji = $penguji;
-            $item->pembimbing = $pembimbing;
-        }
-
-        if($kontak[0]->pembimbing[0]->nilai == null && $kontak[0]->penguji[1]->nilai == null
-          && $kontak[0]->penguji[0]->nilai == null && $kontak[0]->pembimbing[1]->nilai == null) {
-            $nilai = (.3*$kontak[0]->penguji[0]->nilai) + (.3*$kontak[0]->penguji[1]->nilai) +  (.2*$kontak[0]->pembimbing[0]->nilai) + (.2*$kontak[0]->pembimbing[1]->nilai);
-        }
-
-        $nilaiku->nilai =  $nilai != null ? $nilai : "Belum ada";
-        $nilaiku->mutu  =  $nilai != null ? $this->acd->_mutu($nilaiku->nilai) : "Belum ada";
-        $nilaiku->color =  $nilai != null ? $this->acd->warna($nilaiku->nilai) : "#000";
-
-        $kontak[0]->nilai[0] = $nilaiku;
-
-        $this->response($kontak[0], 200);
-    }
-
-    function nilai_kompre_get() {
-        $mhs = $this->get('nim');
-        $ada_nilai = true;
-        $presentase_kompre = .333333333; //must be precise!
-        $nilai = null;
-        $nilaiku = new stdClass();
-
-        $kontak = $this->acd->lihat_nilai_kompre($mhs);
-
-        foreach($kontak as $key=>$item) {
-            $status = $this->acd->get_status_dosen($item->nim, "Penguji Sidang Komprehensif %");
-            $item->penguji = $status;
-        }
-
-        if($kontak[0]->penguji[0]->nilai == null && $kontak[0]->penguji[1]->nilai == null && $kontak[0]->penguji[2]->nilai == null) {
-            $nilai = ($presentase_kompre*$kontak[0]->penguji[0]->nilai) + ($presentase_kompre*$kontak[0]->penguji[1]->nilai) +($presentase_kompre*$kontak[0]->penguji[2]->nilai);
-
-            if($nilai > 100) $nilai = 100;
-        }
-
-        $nilaiku->nilai =  $nilai != null ? $nilai : "Belum ada";
-        $nilaiku->mutu  =  $nilai != null ? $this->acd->_mutu($nilaiku->nilai) : "Belum ada";
-        $nilaiku->color =  $nilai != null ? $this->acd->warna($nilaiku->nilai) : "#000";
-
-        $kontak[0]->nilai[0] = $nilaiku;
-
-        $this->response($kontak[0], 200);
-    }
-
-    function cek_nilai_get() {
+       function cek_nilai_get() {
         $id = $this->get('status');
-
         $kontak = $this->acd->cek_nilai($id);
-
         foreach($kontak as $key=>$item) {
             $item->color = $this->acd->warna($item->nilai);
         }
-
         if(empty($kontak)) $kontak = [["nilai" => "Belum ada", "mutu" => "Belum ada", "color" => "#000000"]];
-
         $this->response($kontak, 200);
+       }
+
+    public function revisi_get() {
+        $status = $this->get('id_status');
+        $mhs = $this->get('mahasiswa');
+
+        $result = [];
+
+        if(isset($status)) {
+            $result =  $this->acd->get_revisi(["t_status.id_status" => status]);
+        } elseif(isset($mhs)) {
+            $result = $this->acd->get_revisi(["t_mahasiswa.nim" => $mhs]);
+        }
+
+        $this->response($result, 200);
+
+    }
+
+    public function input_revisi_post() {
+        //INSERT INTO `t_revisi` (`id_revisi`, `id_status`, `detail_revisi`, `tgl_revisi_input`, `tgl_revisi_deadline`, `status`) VALUES (NULL, '392', 'Testing', CURRENT_TIMESTAMP, NULL, '0');
     }
 
     public function hello_get() {
@@ -316,14 +240,6 @@ class Inputapi extends REST_Controller {
         $response = ['status' => $status, 'token' => $token];
         // REST_Controller provide this method to send responses
         $this->response($response, $status);
-    }
-
-    public function status_get() {
-        $id = $this->get("id");
-
-        $f = $this->acd->cek_id_status($id);
-
-        $this->response(["result" => $f], 200);
     }
 
     public function input_nilai_post() {
