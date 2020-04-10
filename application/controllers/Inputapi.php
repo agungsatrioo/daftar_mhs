@@ -287,6 +287,24 @@ class Inputapi extends REST_Controller {
         }
     }
 
+    public function revisi_delete() {
+        $headers    = $this->input->request_headers();
+        $idstatus   = $headers["id_status"];
+        $id   = $headers["id_revisi"];
+
+        if(isset($idstatus)) {
+            try {
+                $result = $this->acd->func_delete_revisi($id, $idstatus);
+
+                $this->my_response($result);
+            } catch(Exception $e) {
+                $this->my_crash();
+            }
+        } else {
+            $this->response(["error" => "You are not allowed to use this method."], 405);
+        }
+    }
+
     public function revisi_mark_put() {
         $id         = $this->put("id_revisi");
         $id_status  = $this->put("id_status");

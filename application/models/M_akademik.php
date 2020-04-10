@@ -369,6 +369,26 @@ class M_akademik extends CI_Model {
         } else return "400";
     }
 
+    public function func_delete_revisi($id_revisi, $id_status) {
+        if($this->cek_id_status($id_status)) {
+            if($id_revisi == null) return "401";
+
+            $a = $this->m_query->delete(
+                "t_revisi",
+                [
+                    "id_revisi" => $id_revisi,
+                ],
+                false
+            );
+
+            if(!is_array($a)) {
+                return "ok";
+            } else {
+                return $a['code'];
+            }
+        } else return "400";
+    }
+
     public function func_mark_revisi($id_revisi, $id_status, $status = false) {
         if($this->cek_id_status($id_status)) {
             $a = $this->m_query->update(
