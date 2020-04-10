@@ -26,6 +26,21 @@ class Inputapi extends REST_Controller {
         return false;
     }
 
+    private function my_crash() {
+        $this->response(["code" => $result, "error" => "Terjadi kesalahan pada server."], 400);
+    }
+
+    private function my_response($result) {
+        switch($result) {
+            case "ok":
+                $this->response(["info" => "ok"], 200);
+                break;
+            default:
+                $this->response(["code" => $result,
+                                "error" => $this->acd->explain_error($result)], 400);
+        }
+    }
+
     private function _verify() {
         // Get all the headers
         $hdr_raw = $this->input->request_headers();
@@ -199,7 +214,7 @@ class Inputapi extends REST_Controller {
         $this->response(isset($mhs) ? $kontak[0] : $kontak, 200);
     }
 
-       function cek_nilai_get() {
+    function cek_nilai_get() {
         $id = $this->get('status');
         $kontak = $this->acd->cek_nilai($id);
         foreach($kontak as $key=>$item) {
@@ -207,18 +222,21 @@ class Inputapi extends REST_Controller {
         }
         if(empty($kontak)) $kontak = [["nilai" => "Belum ada", "mutu" => "Belum ada", "color" => "#000000"]];
         $this->response($kontak, 200);
-       }
+    }
 
     public function revisi_get() {
         $status = $this->get('id_status');
-        $mhs = $this->get('mahasiswa');
+        $mhs    = $this->get('mahasiswa');
+        $revid  = $this->get('id_revisi');
 
         $result = [];
 
         if(isset($status)) {
-            $result =  $this->acd->get_revisi(["t_status.id_status" => status]);
+            $result =  $this->acd->get_revisi(["t_status.id_status" => $status]);
         } elseif(isset($mhs)) {
             $result = $this->acd->get_revisi(["t_mahasiswa.nim" => $mhs]);
+        } elseif(isset($revid)) {
+            $result = $this->acd->get_revisi(["id_revisi" => $revid]);
         }
 
         $this->response($result, 200);
@@ -227,6 +245,64 @@ class Inputapi extends REST_Controller {
 
     public function input_revisi_post() {
         //INSERT INTO `t_revisi` (`id_revisi`, `id_status`, `detail_revisi`, `tgl_revisi_input`, `tgl_revisi_deadline`, `status`) VALUES (NULL, '392', 'Testing', CURRENT_TIMESTAMP, NULL, '0');
+    }
+
+    public function revisi_post() {
+        $id         = $this->post("id_status");
+        $details    = $this->post("detail_revisi");
+        $deadline   = $this->post("tgl_revisi_deadline");
+        $status     = $this->post("status");
+
+        if(!empty($this->_verify())) {
+            try {
+                $result = $this->acd->func_tambah_revisi($id, $details, $deadline, $status);
+
+                $this->my_response($result);
+            } catch(Exception $e) {
+                $this->my_crash();
+            }
+
+        } else {
+            $this->response(["error" => "You are not allowed to use this method."], 401);
+        }
+    }
+
+    public function revisi_put() {
+        $id         = $this->put("id_revisi");
+        $idstatus   = $this->put("id_status");
+        $details    = $this->put("detail_revisi");
+        $deadline   = $this->put("tgl_revisi_deadline");
+        $status     = $this->put("status");
+
+        if(!empty($this->_verify())) {
+            try {
+                $result = $this->acd->func_edit_revisi($id, $idstatus, $details, $deadline, $status);
+
+                $this->my_response($result);
+            } catch(Exception $e) {
+                $this->my_crash();
+            }
+        } else {
+            $this->response(["error" => "You are not allowed to use this method."], 401);
+        }
+    }
+
+    public function revisi_mark_put() {
+        $id         = $this->put("id_revisi");
+        $id_status  = $this->put("id_status");
+        $status     = $this->put("status_revisi");
+
+        if(!empty($this->_verify())) {
+            try {
+                $result = $this->acd->func_mark_revisi($id, $id_status, $status);
+
+                $this->my_response($result);
+            } catch(Exception $e) {
+                $this->my_crash();
+            }
+        } else {
+            $this->response(["error" => "You are not allowed to use this method."], 401);
+        }
     }
 
     public function hello_get() {
@@ -251,15 +327,12 @@ class Inputapi extends REST_Controller {
                 $this->response(["error" => "The value you entered ($nilai) is not a number."], 400);
             } else {
                 if($nilai > 0 && $nilai <= 100) {
-                    $result = $this->acd->func_input_nilai($id, $nilai);
+                    try {
+                        $result = $this->acd->func_input_nilai($id, $nilai);
 
-                    switch($result) {
-                        case "ok":
-                            $this->response(["info" => "ok"], 200);
-                            break;
-                        default:
-                            $this->response(["code" => $result,
-                                            "error" => $this->acd->explain_error($result)], 400);
+                        $this->my_response($result);
+                    } catch(Exception $e) {
+                        $this->my_crash();
                     }
                 } else {
                     $this->response(["error" => "Please enter 0-100. Value you entered is: $nilai"], 400);
@@ -277,15 +350,12 @@ class Inputapi extends REST_Controller {
                 $this->response(["error" => "The value you entered ($nilai) is not a number."], 400);
             } else {
                 if($nilai > 0 && $nilai <= 100) {
-                    $result = $this->acd->func_edit_nilai($id, $nilai);
+                     try {
+                        $result = $this->acd->func_edit_nilai($id, $nilai);
 
-                    switch($result) {
-                        case "ok":
-                            $this->response(["info" => "ok"], 200);
-                            break;
-                        default:
-                            $this->response(["code" => $result,
-                                            "error" => $this->acd->explain_error($result)], 400);
+                        $this->my_response($result);
+                    } catch(Exception $e) {
+                        $this->my_crash();
                     }
                 } else {
                     $this->response(["error" => "Please enter 0-100. Value you entered is: $nilai"], 400);
@@ -293,4 +363,5 @@ class Inputapi extends REST_Controller {
             }
         }
     }
+
 }

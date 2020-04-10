@@ -244,7 +244,9 @@ class M_akademik extends CI_Model {
         $query = $this->m_query->select($builder);
 
         foreach($query as $item) {
-            $item->color = $this->acd->warna($item->nilai);
+            $item->color = $this->warna($item->nilai);
+
+            $item->revisi = $this->get_revisi(["t_status.id_status" => $item->id_status]);
         }
 
         return $query;
@@ -272,8 +274,8 @@ class M_akademik extends CI_Model {
         $query = $this->m_query->select($builder);
 
         foreach($query as $item) {
-            $item->color = $this->acd->warna($item->nilai);
-            $item->revisi = $this->acd->get_revisi(["t_status.id_status" => $item->id_status]);
+            $item->color = $this->warna($item->nilai);
+            $item->revisi = $this->get_revisi(["t_status.id_status" => $item->id_status]);
         }
 
         return $query;
@@ -310,6 +312,72 @@ class M_akademik extends CI_Model {
                 [
                     "nilai"     => $nilai,
                     "mutu"      => $this->_mutu($nilai)
+                ],
+                false
+            );
+
+            if(!is_array($a)) {
+                return "ok";
+            } else {
+                return $a['code'];
+            }
+        } else return "400";
+    }
+
+    public function func_tambah_revisi($id_status, $detail_revisi, $deadline = "NULL", $status = false) {
+        if($this->cek_id_status($id_status)) {
+            $a = $this->m_query->insert(
+                "t_revisi",
+                [
+                    "id_status"             => $id_status,
+                    "detail_revisi"         => $detail_revisi,
+                    "tgl_revisi_deadline"   => $deadline,
+                    "status"                => $status ? 1 : 0
+                ],
+                true
+            );
+
+            if(key_exists("id", $a)) {
+                return "ok";
+            } else {
+                return $a['code'];
+            }
+        } else return "400";
+    }
+
+    public function func_edit_revisi($id_revisi, $id_status, $detail_revisi, $deadline = "NULL", $status = false) {
+        if($this->cek_id_status($id_status)) {
+            $a = $this->m_query->update(
+                "t_revisi",
+                [
+                    "id_revisi" => $id_revisi,
+                ],
+                [
+                    "detail_revisi"         => $detail_revisi,
+                    "tgl_revisi_edit"       => "CURRENT_TIMESTAMP",
+                    "tgl_revisi_deadline"   => $deadline,
+                    "status"                => $status ? 1 : 0
+                ],
+                false
+            );
+
+            if(!is_array($a)) {
+                return "ok";
+            } else {
+                return $a['code'];
+            }
+        } else return "400";
+    }
+
+    public function func_mark_revisi($id_revisi, $id_status, $status = false) {
+        if($this->cek_id_status($id_status)) {
+            $a = $this->m_query->update(
+                "t_revisi",
+                [
+                    "id_revisi" => $id_revisi,
+                ],
+                [
+                    "status"    => $status ? 1 : 0
                 ],
                 false
             );
