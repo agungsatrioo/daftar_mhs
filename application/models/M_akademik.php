@@ -354,7 +354,7 @@ class M_akademik extends CI_Model {
                 ],
                 [
                     "detail_revisi"         => $detail_revisi,
-                    "tgl_revisi_edit"       => date('m/d/Y h:i:s a', time());,
+                    "tgl_revisi_edit"       => date('m/d/Y h:i:s a', time()),
                     "tgl_revisi_deadline"   => $deadline,
                     "status"                => $status ? 1 : 0
                 ],
