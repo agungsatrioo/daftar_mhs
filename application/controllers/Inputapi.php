@@ -292,16 +292,18 @@ class Inputapi extends REST_Controller {
         $idstatus   = $headers["id_status"];
         $id   = $headers["id_revisi"];
 
-        if(isset($idstatus)) {
-            try {
-                $result = $this->acd->func_delete_revisi($id, $idstatus);
+        if(!empty($this->_verify())) {
+            if(isset($idstatus)) {
+                try {
+                    $result = $this->acd->func_delete_revisi($id, $idstatus);
 
-                $this->my_response($result);
-            } catch(Exception $e) {
-                $this->my_crash();
+                    $this->my_response($result);
+                } catch(Exception $e) {
+                    $this->my_crash();
+                }
+            } else {
+                $this->response(["error" => "You are not allowed to use this method."], 405);
             }
-        } else {
-            $this->response(["error" => "You are not allowed to use this method."], 405);
         }
     }
 
