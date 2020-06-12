@@ -1,9 +1,18 @@
-<mxfile host="app.diagrams.net" modified="2020-06-12T10:23:21.216Z" agent="5.0 (Windows)" etag="HFdEwMECTksKLMzcYLCx" version="13.2.3" type="github">
-  <diagram id="LcM3cBmE-SdUiEsXDPEO" name="Page-2">
+<mxfile host="app.diagrams.net" modified="2020-06-12T10:25:03.898Z" agent="5.0 (Windows)" etag="Wa_vBv8cEA2maPI4JBt0" version="13.2.3" type="github">
+  <diagram id="LcM3cBmE-SdUiEsXDPEO" name="SDLihatPendaftarSidang">
     <mxGraphModel dx="868" dy="489" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="SE30XjsU0gi5ZBVszvuD-0" />
         <mxCell id="SE30XjsU0gi5ZBVszvuD-1" parent="SE30XjsU0gi5ZBVszvuD-0" />
+        <mxCell id="NHekJ_RYDnZEMuJXtxR0-1" value="Administrator" style="shape=umlLifeline;participant=umlActor;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;verticalAlign=top;spacingTop=36;labelBackgroundColor=#ffffff;outlineConnect=0;size=30;" vertex="1" parent="SE30XjsU0gi5ZBVszvuD-1">
+          <mxGeometry x="40" y="50" width="20" height="300" as="geometry" />
+        </mxCell>
+        <mxCell id="NHekJ_RYDnZEMuJXtxR0-2" value="&lt;div&gt;Data pendaftar&lt;/div&gt;&lt;div&gt;sidang&lt;br&gt;&lt;/div&gt;" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;" vertex="1" parent="SE30XjsU0gi5ZBVszvuD-1">
+          <mxGeometry x="90" y="50" width="100" height="300" as="geometry" />
+        </mxCell>
+        <mxCell id="NHekJ_RYDnZEMuJXtxR0-3" value=":Object" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;" vertex="1" parent="SE30XjsU0gi5ZBVszvuD-1">
+          <mxGeometry x="370" y="100" width="100" height="300" as="geometry" />
+        </mxCell>
       </root>
     </mxGraphModel>
   </diagram>
